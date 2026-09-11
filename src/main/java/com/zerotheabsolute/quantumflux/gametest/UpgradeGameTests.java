@@ -33,25 +33,24 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.common.MinecraftForge;
+import com.zerotheabsolute.quantumflux.gametest.FixturePlayers;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.GameTestHolder;
+
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@GameTestHolder(QuantumFlux.MODID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(value = QuantumFlux.MODID, namespace = QuantumFlux.MODID)
 public final class UpgradeGameTests {
     private static final BlockPos PYLON = new BlockPos(2, 1, 2);
 
     private UpgradeGameTests() {}
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void upgradeRecipesHaveUniqueCraftingResults(GameTestHelper helper) {
         var recipes = helper.getLevel().getRecipeManager();
         for (Item upgrade : upgradeItems()) {
@@ -73,7 +72,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void inventoryUpgradesChangeActualDeliveryAndSurviveReload(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -115,7 +114,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void chargedBuffersCannotBeRemovedByInventoryActions(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -153,7 +152,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void upgradeReadingsSurviveVanillaShortTransport(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -188,7 +187,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void downgradeRetainsInactiveLinksAndRestoringUpgradesResumesDelivery(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         pylon.getUpgrades().insertItem(0, new ItemStack(QFItems.RANGE_UPGRADE.get(), 4), false);
@@ -225,7 +224,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void breakingEitherHalfDropsEachInstalledUpgradeOnce(GameTestHelper helper) {
         for (boolean top : new boolean[]{false, true}) {
             BlockPos relative = top ? PYLON.offset(6, 0, 0) : PYLON;
@@ -251,7 +250,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void explosionAtEitherHalfDropsUpgradesOnceAndUnregistersPylon(GameTestHelper helper) {
         var level = helper.getLevel();
         var manager = QuantumFluxNetworkManager.get(level);
@@ -288,7 +287,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void openUpgradeMenuRechecksMembershipRangeAndClaims(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -310,12 +309,12 @@ public final class UpgradeGameTests {
         helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Distant player installed an upgrade");
         player.setPos(pylon.getBlockPos().getCenter());
         var denied = new DenyInteraction(pylon.getBlockPos());
-        NeoForge.EVENT_BUS.register(denied);
+        MinecraftForge.EVENT_BUS.register(denied);
         try {
             menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
             helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Claim denial was bypassed");
         } finally {
-            NeoForge.EVENT_BUS.unregister(denied);
+            MinecraftForge.EVENT_BUS.unregister(denied);
         }
         helper.assertValueEqual(player.getInventory().getItem(9).getCount(), 4, "Denied clicks lost player items");
         menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
@@ -344,7 +343,7 @@ public final class UpgradeGameTests {
     }
 
     private static ServerPlayer player(GameTestHelper helper, QuantumPylonBlockEntity pylon) {
-        var player = FakePlayerFactory.get(helper.getLevel(), new GameProfile(UUID.randomUUID(), "QFUpgrades"));
+        var player = FixturePlayers.get(helper.getLevel(), new GameProfile(UUID.randomUUID(), "QFUpgrades"));
         player.setPos(pylon.getBlockPos().getCenter());
         var gadget = new ItemStack(QFItems.QUANTUM_GADGET.get());
         gadget.set(QFDataComponents.GADGET_ACTIVE.get(), true);

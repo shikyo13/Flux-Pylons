@@ -20,18 +20,17 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.common.MinecraftForge;
+import com.zerotheabsolute.quantumflux.gametest.FixturePlayers;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.GameTestHolder;
 
-@GameTestHolder(QuantumFlux.MODID)
-@PrefixGameTestTemplate(false)
+
+@GameTestHolder(value = QuantumFlux.MODID, namespace = QuantumFlux.MODID)
 public final class QFNetworkingGameTests {
 
-    private static final String EMPTY_TEMPLATE = "empty";
+    private static final String EMPTY_TEMPLATE = "quantumflux:empty";
     private static final BlockPos PYLON_POS = new BlockPos(2, 1, 2);
 
     private QFNetworkingGameTests() {}
@@ -79,13 +78,13 @@ public final class QFNetworkingGameTests {
                 "Unauthorized network mutation result");
 
         DenyInteraction listener = new DenyInteraction(absolutePos);
-        NeoForge.EVENT_BUS.register(listener);
+        MinecraftForge.EVENT_BUS.register(listener);
         try {
             helper.assertValueEqual(QFNetworking.processGadgetAction(valid, owner),
                     ActionResultS2CPayload.Result.NOT_ALLOWED,
                     "Claim-denied payload result");
         } finally {
-            NeoForge.EVENT_BUS.unregister(listener);
+            MinecraftForge.EVENT_BUS.unregister(listener);
         }
 
         GadgetActionPayload invalidOrdinal = new GadgetActionPayload(
@@ -220,7 +219,7 @@ public final class QFNetworkingGameTests {
     }
 
     private static ServerPlayer makeFakePlayer(GameTestHelper helper, String name) {
-        return FakePlayerFactory.get(
+        return FixturePlayers.get(
                 helper.getLevel(), new GameProfile(java.util.UUID.randomUUID(), name));
     }
 

@@ -16,10 +16,6 @@ jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        neo-version: ['21.1.206', '21.1.235']
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -64,21 +60,20 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Verify generated data is committed
-        if: matrix.neo-version == '21.1.206'
         run: |
-          ./gradlew --no-daemon -Pneo_version=${{ matrix.neo-version }} runData
+          ./gradlew --no-daemon runData
           git diff --exit-code -- src/generated
 
       - name: Build and verify release JAR
-        run: ./gradlew --no-daemon -Pneo_version=${{ matrix.neo-version }} clean build
+        run: ./gradlew --no-daemon clean build
 
-      - name: Run NeoForge GameTests
-        run: ./gradlew --no-daemon -Pneo_version=${{ matrix.neo-version }} runGameTestServer
+      - name: Run Forge GameTests
+        run: ./gradlew --no-daemon runGameTestServer
 
       - name: Upload release JAR
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: quantum-flux-neoforge-${{ matrix.neo-version }}-${{ github.sha }}
+          name: flux-pylons-forge-1.21.1-${{ github.sha }}
           path: build/libs/flux-pylons-*.jar
           if-no-files-found: error
           retention-days: 14
@@ -87,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: gametest-log-neoforge-${{ matrix.neo-version }}-${{ github.sha }}
+          name: gametest-log-forge-1.21.1-${{ github.sha }}
           path: run/logs/latest.log
           if-no-files-found: ignore
           retention-days: 14

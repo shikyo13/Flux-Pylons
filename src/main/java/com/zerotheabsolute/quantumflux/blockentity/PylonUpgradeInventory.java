@@ -5,7 +5,7 @@ import com.zerotheabsolute.quantumflux.item.UpgradeType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraftforge.items.ItemStackHandler;
 
 /** Four typed slots owned by the pylon; buffer removal cannot discard stored FE. */
 public final class PylonUpgradeInventory extends ItemStackHandler {

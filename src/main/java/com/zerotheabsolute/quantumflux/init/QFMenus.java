@@ -4,13 +4,13 @@ import com.zerotheabsolute.quantumflux.QuantumFlux;
 import com.zerotheabsolute.quantumflux.menu.PylonUpgradeMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.common.extensions.IForgeMenuType;
+import net.minecraftforge.registries.RegistryObject;
+import net.minecraftforge.registries.DeferredRegister;
 
 public final class QFMenus {
     public static final DeferredRegister<MenuType<?>> MENUS = DeferredRegister.create(Registries.MENU, QuantumFlux.MODID);
-    public static final DeferredHolder<MenuType<?>, MenuType<PylonUpgradeMenu>> PYLON_UPGRADES =
-            MENUS.register("pylon_upgrades", () -> IMenuTypeExtension.create(PylonUpgradeMenu::new));
+    public static final RegistryObject<MenuType<PylonUpgradeMenu>> PYLON_UPGRADES =
+            MENUS.register("pylon_upgrades", () -> IForgeMenuType.create(PylonUpgradeMenu::new));
     private QFMenus() {}
 }

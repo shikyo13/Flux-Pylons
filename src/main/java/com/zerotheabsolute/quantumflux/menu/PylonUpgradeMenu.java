@@ -9,7 +9,7 @@ import com.zerotheabsolute.quantumflux.item.UpgradeType;
 import com.zerotheabsolute.quantumflux.network.QFNetworking;
 import com.zerotheabsolute.quantumflux.network.data.QuantumFluxNetworkManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,8 +20,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.SlotItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 /** Vanilla inventory synchronization and click handling for the four upgrade slots. */
@@ -31,7 +31,7 @@ public final class PylonUpgradeMenu extends AbstractContainerMenu {
     @Nullable private final QuantumPylonBlockEntity pylon;
     private final ContainerData data;
 
-    public PylonUpgradeMenu(int id, Inventory inventory, RegistryFriendlyByteBuf extra) {
+    public PylonUpgradeMenu(int id, Inventory inventory, FriendlyByteBuf extra) {
         this(id, inventory, extra.readBlockPos(), null, new ItemStackHandler(4) {
             @Override public int getSlotLimit(int slot) { return UpgradeType.MAX_LEVEL; }
             @Override public boolean isItemValid(int slot, ItemStack stack) {

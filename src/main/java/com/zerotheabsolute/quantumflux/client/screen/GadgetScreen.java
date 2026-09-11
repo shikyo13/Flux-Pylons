@@ -29,7 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import com.zerotheabsolute.quantumflux.network.ForgePacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1039,14 +1039,14 @@ public final class GadgetScreen extends Screen {
         int requestId = allocateRequestId();
         pendingRequests.put(requestId, payload.action());
         trimPendingRequests();
-        PacketDistributor.sendToServer(payload.withRequestId(requestId));
+        ForgePacketDistributor.sendToServer(payload.withRequestId(requestId));
     }
 
     private void sendGadgetAction(GadgetActionPayload payload) {
         int requestId = allocateRequestId();
         pendingRequests.put(requestId, NetworkActionC2SPayload.Action.INVALID);
         trimPendingRequests();
-        PacketDistributor.sendToServer(payload.withRequestId(requestId));
+        ForgePacketDistributor.sendToServer(payload.withRequestId(requestId));
     }
 
     private int allocateRequestId() {

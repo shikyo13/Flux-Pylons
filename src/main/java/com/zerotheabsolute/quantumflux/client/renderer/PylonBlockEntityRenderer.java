@@ -374,8 +374,7 @@ public final class PylonBlockEntityRenderer implements BlockEntityRenderer<Quant
         return ((color >> shift) & 0xFF) / 255.0f;
     }
 
-    @Override
-    public AABB getRenderBoundingBox(QuantumPylonBlockEntity blockEntity) {
+    public static AABB renderBounds(QuantumPylonBlockEntity blockEntity) {
         BlockPos source = blockEntity.getBlockPos();
         AABB bounds = new AABB(
                 source.getX() - 0.2,

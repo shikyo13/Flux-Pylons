@@ -4,7 +4,7 @@ import com.zerotheabsolute.quantumflux.QuantumFlux;
 import com.zerotheabsolute.quantumflux.init.QFBlocks;
 import com.zerotheabsolute.quantumflux.init.QFItems;
 import net.minecraft.data.PackOutput;
-import net.neoforged.neoforge.common.data.LanguageProvider;
+import net.minecraftforge.common.data.LanguageProvider;
 
 public class QFLanguageProvider extends LanguageProvider {
 

@@ -30,17 +30,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.gametest.GameTestHolder;
+
 
 import java.util.UUID;
 
-@GameTestHolder(QuantumFlux.MODID)
-@PrefixGameTestTemplate(false)
+@GameTestHolder(value = QuantumFlux.MODID, namespace = QuantumFlux.MODID)
 public final class QuantumFluxGameTests {
 
-    private static final String EMPTY_TEMPLATE = "empty";
+    private static final String EMPTY_TEMPLATE = "quantumflux:empty";
     private static final BlockPos PYLON_A = new BlockPos(2, 1, 2);
     private static final BlockPos PYLON_B = new BlockPos(5, 1, 2);
     private static final BlockPos PYLON_C = new BlockPos(8, 1, 2);
@@ -525,7 +524,7 @@ public final class QuantumFluxGameTests {
         EnergyReceiverFixture target = EnergyReceiverFixture.place(helper, PYLON_B);
         helper.assertTrue(source.tryLink(target.getBlockPos()), "Input must initially link");
         target.getEnergyStorage().externalInputEnabled = false;
-        helper.getLevel().invalidateCapabilities(target.getBlockPos());
+
         helper.assertTrue(!com.zerotheabsolute.quantumflux.util.EnergyHelper.blockAcceptsEnergy(
                 helper.getLevel(), target.getBlockPos()), "Internal-only capability is not a wireless input");
         source.getEnergyStorage().receiveEnergy(73, false);
@@ -538,7 +537,7 @@ public final class QuantumFluxGameTests {
             helper.assertTrue(source.isLinkedTo(target.getBlockPos()), "Side settings must retain links");
             target.getEnergyStorage().externalInputEnabled = true;
             target.getEnergyStorage().acceptingEnergy = false;
-            helper.getLevel().invalidateCapabilities(target.getBlockPos());
+
             helper.assertTrue(source.getConnectionStatus(target.getBlockPos())
                             == com.zerotheabsolute.quantumflux.util.ConnectionStatus.NOT_ACCEPTING,
                     "An empty rejecting machine must not be described as full");

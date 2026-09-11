@@ -4,14 +4,14 @@ import com.zerotheabsolute.quantumflux.QuantumFlux;
 import com.zerotheabsolute.quantumflux.block.QuantumPylonBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
+import net.minecraftforge.registries.DeferredRegister;
 
 public final class QFBlocks {
 
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(QuantumFlux.MODID);
+    public static final DeferredRegister<net.minecraft.world.level.block.Block> BLOCKS = DeferredRegister.create(net.minecraftforge.registries.ForgeRegistries.BLOCKS, QuantumFlux.MODID);
 
-    public static final DeferredBlock<QuantumPylonBlock> QUANTUM_PYLON = BLOCKS.register(
+    public static final RegistryObject<QuantumPylonBlock> QUANTUM_PYLON = BLOCKS.register(
             "quantum_pylon",
             () -> new QuantumPylonBlock(
                     BlockBehaviour.Properties.of()

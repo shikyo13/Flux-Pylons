@@ -5,29 +5,36 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.energy.EnergyStorage;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+
+
+import net.minecraftforge.energy.EnergyStorage;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /** Development-only receiving capability. The entire gametest package is excluded from releases. */
-@EventBusSubscriber(modid = QuantumFlux.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = QuantumFlux.MODID, bus = EventBusSubscriber.Bus.FORGE)
 public record EnergyReceiverFixture(BlockPos getBlockPos, Storage getEnergyStorage) {
     private static final Map<Level, Map<BlockPos, Storage>> RECEIVERS = new WeakHashMap<>();
 
     @SubscribeEvent
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlock(Capabilities.EnergyStorage.BLOCK,
-                (level, pos, state, blockEntity, side) -> {
-                    Storage storage = RECEIVERS.getOrDefault(level, Map.of()).get(pos);
-                    return storage != null && (side == null || storage.externalInputEnabled) ? storage : null;
-                },
-                Blocks.BARREL);
+    public static void attach(net.minecraftforge.event.AttachCapabilitiesEvent<net.minecraft.world.level.block.entity.BlockEntity> event) {
+        if (!(event.getObject() instanceof net.minecraft.world.level.block.entity.BarrelBlockEntity barrel)) return;
+        event.addCapability(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "test_receiver"),
+                new net.minecraftforge.common.capabilities.ICapabilityProvider() {
+                    @Override
+                    public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
+                            net.minecraftforge.common.capabilities.Capability<T> capability,
+                            @org.jetbrains.annotations.Nullable net.minecraft.core.Direction side) {
+                        if (capability != net.minecraftforge.common.capabilities.ForgeCapabilities.ENERGY) return net.minecraftforge.common.util.LazyOptional.empty();
+                        Storage storage = RECEIVERS.getOrDefault(barrel.getLevel(), Map.of()).get(barrel.getBlockPos());
+                        if (storage == null || (side != null && !storage.externalInputEnabled)) return net.minecraftforge.common.util.LazyOptional.empty();
+                        return net.minecraftforge.common.util.LazyOptional.of(() -> storage).cast();
+                    }
+                });
     }
 
     public static EnergyReceiverFixture place(GameTestHelper helper, BlockPos relativePos) {
@@ -35,7 +42,6 @@ public record EnergyReceiverFixture(BlockPos getBlockPos, Storage getEnergyStora
         BlockPos position = helper.absolutePos(relativePos);
         Storage storage = new Storage(100_000);
         RECEIVERS.computeIfAbsent(helper.getLevel(), ignored -> new HashMap<>()).put(position, storage);
-        helper.getLevel().invalidateCapabilities(position);
         return new EnergyReceiverFixture(position, storage);
     }
 

@@ -10,23 +10,24 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.ChunkWatchEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.ChunkWatchEvent;
+import net.minecraftforge.event.TickEvent;
 
 public class GadgetInteractionHandler {
 
     @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
         QFNetworking.flushNetworkListBroadcasts();
         QFNetworking.refreshActiveGadgetNetworkLists(event.getServer());
     }
 
     @SubscribeEvent
-    public static void onChunkSent(ChunkWatchEvent.Sent event) {
-        for (var blockEntity : event.getChunk().getBlockEntities().values()) {
+    public static void onChunkSent(ChunkWatchEvent.Watch event) {
+        for (var blockEntity : event.getLevel().getChunk(event.getPos().x, event.getPos().z).getBlockEntities().values()) {
             if (blockEntity instanceof com.zerotheabsolute.quantumflux.blockentity.QuantumPylonBlockEntity pylon) {
                 pylon.sendSyncTo(event.getPlayer());
             }

@@ -29,7 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -42,6 +42,10 @@ import java.util.Set;
 import java.util.UUID;
 
 public class QuantumPylonBlockEntity extends BlockEntity {
+    @Override public net.minecraft.world.phys.AABB getRenderBoundingBox() {
+        return com.zerotheabsolute.quantumflux.client.ClientScreenBridge.renderBounds(this);
+    }
+
 
     // ── Energy ──
     private PylonEnergyStorage energyStorage;
@@ -437,7 +441,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
     /** Send a sync payload to a specific player (used when opening GUI). */
     public void sendSyncTo(net.minecraft.server.level.ServerPlayer player) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, buildSyncPayload());
+        com.zerotheabsolute.quantumflux.network.ForgePacketDistributor.sendToPlayer(player, buildSyncPayload());
     }
 
     // ══════════════════════════════════════════
@@ -475,7 +479,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
     private void syncToTrackingClients() {
         if (level == null || level.isClientSide) return;
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(
+        com.zerotheabsolute.quantumflux.network.ForgePacketDistributor.sendToPlayersTrackingChunk(
                 (net.minecraft.server.level.ServerLevel) level,
                 new ChunkPos(getBlockPos()),
                 buildSyncPayload());
@@ -489,7 +493,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
                 .map(connection -> new PylonTelemetryPayload.ConnectionReading(
                         connection.getLastTransferred(), describeConnection(connection, availableEnergy)))
                 .toList();
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(
+        com.zerotheabsolute.quantumflux.network.ForgePacketDistributor.sendToPlayersTrackingChunk(
                 (net.minecraft.server.level.ServerLevel) level,
                 new ChunkPos(getBlockPos()),
                 new PylonTelemetryPayload(getBlockPos(), energyStorage.getEnergyStored(),
@@ -548,6 +552,28 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide) syncQueued = true;
     }
 
+    private net.minecraftforge.common.util.LazyOptional<net.minecraftforge.energy.IEnergyStorage> energyCapability =
+            net.minecraftforge.common.util.LazyOptional.of(() -> energyStorage);
+
+    @Override
+    public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
+            net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction side) {
+        if (capability == net.minecraftforge.common.capabilities.ForgeCapabilities.ENERGY) return energyCapability.cast();
+        return super.getCapability(capability, side);
+    }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        energyCapability.invalidate();
+    }
+
+    @Override
+    public void reviveCaps() {
+        super.reviveCaps();
+        energyCapability = net.minecraftforge.common.util.LazyOptional.of(() -> energyStorage);
+    }
+
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
@@ -581,6 +607,8 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         int storedEnergy = tag.getInt("Energy");
         upgrades.deserializeNBT(registries, tag.getCompound("Upgrades"));
         this.energyStorage = createEnergyStorage(getEffectiveBufferSize(), storedEnergy);
+        energyCapability.invalidate();
+        energyCapability = net.minecraftforge.common.util.LazyOptional.of(() -> energyStorage);
 
         this.beamColor = tag.contains("BeamColor")
                 ? tag.getInt("BeamColor") & 0xFFFFFF

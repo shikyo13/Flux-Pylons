@@ -4,8 +4,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import com.zerotheabsolute.quantumflux.block.QuantumPylonBlock;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 public final class EnergyHelper {
@@ -19,7 +19,8 @@ public final class EnergyHelper {
                 || !level.hasChunkAt(pos)) {
             return null;
         }
-        return level.getCapability(Capabilities.EnergyStorage.BLOCK, pos, direction);
+        var blockEntity = level.getBlockEntity(pos);
+        return blockEntity == null ? null : blockEntity.getCapability(ForgeCapabilities.ENERGY, direction).orElse(null);
     }
 
     public static boolean blockAcceptsEnergy(Level level, BlockPos pos) {
