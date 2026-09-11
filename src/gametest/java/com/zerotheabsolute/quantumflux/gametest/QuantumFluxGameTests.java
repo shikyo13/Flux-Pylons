@@ -294,11 +294,11 @@ public final class QuantumFluxGameTests {
         java.util.List<QFNetwork> ordered = migrated.getAllNetworks().stream()
                 .sorted(java.util.Comparator.comparingInt(QFNetwork::getNumericId))
                 .toList();
-        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, 
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper,
                 ordered.get(QuantumFluxNetworkManager.MAX_NETWORKS_PER_DIMENSION - 1).getAccessMode(),
                 QFNetwork.AccessMode.PUBLIC,
                 "Last in-cap legacy network access mode");
-        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, 
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper,
                 ordered.get(QuantumFluxNetworkManager.MAX_NETWORKS_PER_DIMENSION).getAccessMode(),
                 QFNetwork.AccessMode.PRIVATE,
                 "First overflow legacy network access mode");
