@@ -7,7 +7,7 @@
 
 ## Version and loader ports
 
-1. **Minecraft 1.20.1 — Forge.** First backport, aimed at the large established technical-modpack catalog.
+1. **Minecraft 1.20.1 — Forge.** The [Forge port](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-forge) builds and passes gameplay and persistence tests. Client testing is in progress.
 2. **Minecraft 1.21.1 — Fabric.** Bring the same power distribution, gadget and guide to Fabric's energy ecosystem.
 3. **Minecraft 1.20.1 — Fabric.** Follow after the version backport and Fabric energy adapter are established.
 
