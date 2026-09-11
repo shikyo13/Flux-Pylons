@@ -20,11 +20,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,50 +63,20 @@ public final class QFNetworking {
 
     private QFNetworking() {}
 
-    public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("3");
-
-        registrar.playToClient(PylonSyncPayload.TYPE, PylonSyncPayload.STREAM_CODEC,
-                QFNetworking::handlePylonSync);
-        registrar.playToClient(PylonTelemetryPayload.TYPE, PylonTelemetryPayload.STREAM_CODEC,
-                QFNetworking::handlePylonTelemetry);
-        registrar.playToClient(NetworkListSyncS2CPayload.TYPE, NetworkListSyncS2CPayload.STREAM_CODEC,
-                QFNetworking::handleNetworkListSync);
-        registrar.playToClient(NetworkTelemetryPayload.TYPE, NetworkTelemetryPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() -> ClientPayloadBridge.handle(payload)));
-        registrar.playToClient(ActionResultS2CPayload.TYPE, ActionResultS2CPayload.STREAM_CODEC,
-                QFNetworking::handleActionResult);
-        registrar.playToClient(OpenPylonPayload.TYPE, OpenPylonPayload.STREAM_CODEC,
-                (payload, context) -> context.enqueueWork(() ->
-                        com.zerotheabsolute.quantumflux.client.ClientScreenBridge.openPylonScreen(payload.pos())));
-
-        registrar.playToServer(GadgetActionPayload.TYPE, GadgetActionPayload.STREAM_CODEC,
-                QFNetworking::handleGadgetAction);
-        registrar.playToServer(NetworkActionC2SPayload.TYPE, NetworkActionC2SPayload.STREAM_CODEC,
-                QFNetworking::handleNetworkAction);
-
-        // LinkActionPayload was never used by the client. It is intentionally not
-        // registered because it duplicated the item interaction path and exposed
-        // arbitrary BlockPos mutation to forged packets.
+    public static void register() {
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(PylonSyncPayload.TYPE, PylonSyncPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(PylonTelemetryPayload.TYPE, PylonTelemetryPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(NetworkListSyncS2CPayload.TYPE, NetworkListSyncS2CPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(NetworkTelemetryPayload.TYPE, NetworkTelemetryPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(ActionResultS2CPayload.TYPE, ActionResultS2CPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(OpenPylonPayload.TYPE, OpenPylonPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(GadgetActionPayload.TYPE, GadgetActionPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GadgetActionPayload.TYPE, (payload, ctx) -> handleGadgetAction(payload, new PayloadContext(ctx.player(), ctx.server())));
+        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(NetworkActionC2SPayload.TYPE, NetworkActionC2SPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(NetworkActionC2SPayload.TYPE, (payload, ctx) -> handleNetworkAction(payload, new PayloadContext(ctx.player(), ctx.server())));
     }
 
-    private static void handlePylonSync(PylonSyncPayload payload, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
-    }
-
-    private static void handlePylonTelemetry(PylonTelemetryPayload payload, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
-    }
-
-    private static void handleNetworkListSync(NetworkListSyncS2CPayload payload, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
-    }
-
-    private static void handleActionResult(ActionResultS2CPayload payload, IPayloadContext ctx) {
-        ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
-    }
-
-    private static void handleGadgetAction(GadgetActionPayload payload, IPayloadContext ctx) {
+    private static void handleGadgetAction(GadgetActionPayload payload, PayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             sendActionResult(player, payload.requestId(), processGadgetAction(payload, player));
@@ -157,9 +122,7 @@ public final class QFNetworking {
                 yield ActionResultS2CPayload.Result.APPLIED;
             }
             case OPEN_UPGRADES -> {
-                player.openMenu(new net.minecraft.world.SimpleMenuProvider(
-                        (id, inventory, ignored) -> new com.zerotheabsolute.quantumflux.menu.PylonUpgradeMenu(id, inventory, pylon),
-                        Component.translatable("screen.quantumflux.upgrades.title")), pylon.getBlockPos());
+                player.openMenu(new com.zerotheabsolute.quantumflux.menu.PylonUpgradeProvider(pylon));
                 yield ActionResultS2CPayload.Result.APPLIED;
             }
             case SET_REDSTONE_MODE -> {
@@ -183,10 +146,10 @@ public final class QFNetworking {
         if (!canConfigurePylonNow(player, pylon)) return;
         sendNetworkListToPlayer(player, QuantumFluxNetworkManager.get(player.serverLevel()));
         pylon.sendSyncTo(player);
-        PacketDistributor.sendToPlayer(player, new OpenPylonPayload(pylon.getBlockPos()));
+        QFPackets.sendToPlayer(player, new OpenPylonPayload(pylon.getBlockPos()));
     }
 
-    private static void handleNetworkAction(NetworkActionC2SPayload payload, IPayloadContext ctx) {
+    private static void handleNetworkAction(NetworkActionC2SPayload payload, PayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             if (!isEligibleSender(player)) {
@@ -584,12 +547,10 @@ public final class QFNetworking {
 
         InteractionHand hand = isActiveGadget(player.getMainHandItem())
                 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-        var permissionEvent = CommonHooks.onRightClickBlock(
-                player, hand, pos,
+        var permissionResult = net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.invoker().interact(
+                player, level, hand,
                 new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
-        return permissionEvent.isCanceled()
-                || permissionEvent.getUseBlock().isFalse()
-                || permissionEvent.getUseItem().isFalse()
+        return permissionResult != net.minecraft.world.InteractionResult.PASS
                 ? ActionResultS2CPayload.Result.NOT_ALLOWED
                 : null;
     }
@@ -708,7 +669,7 @@ public final class QFNetworking {
     private static void sendActionResult(ServerPlayer player, int requestId,
                                          ActionResultS2CPayload.Result result) {
         if (requestId <= 0) return;
-        PacketDistributor.sendToPlayer(player, new ActionResultS2CPayload(requestId, result));
+        QFPackets.sendToPlayer(player, new ActionResultS2CPayload(requestId, result));
     }
 
     /** Build and send the current dimension's listable networks to one player. */
@@ -761,7 +722,7 @@ public final class QFNetworking {
                     network.getBeamStyle().ordinal(), network.isBeamsVisible(), members));
         }
 
-        PacketDistributor.sendToPlayer(player, new NetworkListSyncS2CPayload(summaries));
+        QFPackets.sendToPlayer(player, new NetworkListSyncS2CPayload(summaries));
         sendSelectedNetworkTelemetry(player, manager, new HashMap<>());
     }
 
@@ -805,7 +766,7 @@ public final class QFNetworking {
     private static void sendSelectedNetworkTelemetry(ServerPlayer player, QuantumFluxNetworkManager manager,
                                                       Map<UUID, NetworkTelemetryPayload> snapshots) {
         NetworkTelemetryPayload payload = selectedNetworkTelemetry(player, manager, snapshots);
-        if (payload != null) PacketDistributor.sendToPlayer(player, payload);
+        if (payload != null) QFPackets.sendToPlayer(player, payload);
     }
 
     @org.jetbrains.annotations.Nullable

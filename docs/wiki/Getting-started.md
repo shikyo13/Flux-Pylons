@@ -1,8 +1,10 @@
 # Getting started
 
-You'll need a Flux Pylon, a Flux Gadget, a generator or energy cell from another mod, and a machine that accepts FE.
+You'll need a Flux Pylon, a Flux Gadget, a generator or energy cell from another mod, and a machine that accepts energy.
 
-1. Place the pylon and supply FE to any face. A short cable from your power source to the pylon works.
+On Fabric, install [Fabric API](https://modrinth.com/mod/fabric-api) and [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port). Use generators and machines compatible with Team Reborn's Energy API, such as Tech Reborn. The Energy API itself is bundled with Flux Pylons.
+
+1. Place the pylon and supply energy to any face. A short cable from your power source to the pylon works.
 2. Hold the gadget and sneak-right-click in the air to switch it on.
 3. Right-click in the air to open the gadget. Create a network, then select it.
 4. Right-click either half of the pylon with the active gadget to assign it to that network and open its controls.

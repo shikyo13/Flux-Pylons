@@ -1,6 +1,8 @@
 package com.zerotheabsolute.quantumflux.energy;
 
-import net.neoforged.neoforge.energy.EnergyStorage;
+import team.reborn.energy.api.EnergyStorage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
+import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
 
 import java.util.function.IntConsumer;
 
@@ -8,13 +10,16 @@ import java.util.function.IntConsumer;
  * Receive-only energy storage for the Flux Pylon.
  * Energy can only leave via wireless distribution, never via extraction.
  */
-public class PylonEnergyStorage extends EnergyStorage {
+public class PylonEnergyStorage extends SnapshotParticipant<Integer> implements EnergyStorage, EnergyReceiver {
 
     private static final IntConsumer NO_OP_LISTENER = ignored -> {};
 
     /** Receives the energy value from immediately before each committed mutation. */
     private final IntConsumer changeListener;
     private int nominalCapacity;
+    protected int capacity;
+    protected int energy;
+    private int committedEnergy;
 
     public PylonEnergyStorage(int capacity) {
         this(capacity, 0, NO_OP_LISTENER);
@@ -25,9 +30,10 @@ public class PylonEnergyStorage extends EnergyStorage {
     }
 
     public PylonEnergyStorage(int capacity, int energy, IntConsumer changeListener) {
-        super(sanitizeCapacity(capacity), sanitizeCapacity(capacity), 0);
+        this.capacity = sanitizeCapacity(capacity);
         this.nominalCapacity = this.capacity;
         this.energy = Math.max(0, energy);
+        this.committedEnergy = this.energy;
         this.capacity = Math.max(nominalCapacity, this.energy);
         this.changeListener = changeListener == null ? NO_OP_LISTENER : changeListener;
     }
@@ -39,6 +45,7 @@ public class PylonEnergyStorage extends EnergyStorage {
         if (!simulate && accepted > 0) {
             int previousEnergy = energy;
             energy += accepted;
+            committedEnergy = this.energy;
             changeListener.accept(previousEnergy);
         }
         return accepted;
@@ -49,12 +56,10 @@ public class PylonEnergyStorage extends EnergyStorage {
         return nominalCapacity > 0;
     }
 
-    @Override
     public boolean canExtract() {
         return false;
     }
 
-    @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
         return 0;
     }
@@ -71,6 +76,7 @@ public class PylonEnergyStorage extends EnergyStorage {
         int previousEnergy = energy;
         energy -= removed;
         capacity = Math.max(nominalCapacity, energy);
+        committedEnergy = this.energy;
         changeListener.accept(previousEnergy);
         return removed;
     }
@@ -87,6 +93,7 @@ public class PylonEnergyStorage extends EnergyStorage {
         int previousEnergy = this.energy;
         this.energy = clampedEnergy;
         capacity = Math.max(nominalCapacity, clampedEnergy);
+        committedEnergy = this.energy;
         changeListener.accept(previousEnergy);
         return true;
     }
@@ -98,6 +105,26 @@ public class PylonEnergyStorage extends EnergyStorage {
     }
 
     public int getNominalCapacity() { return nominalCapacity; }
+
+    @Override public long insert(long amount, TransactionContext transaction) {
+        if (amount < 0) throw new IllegalArgumentException("Negative energy insertion");
+        int accepted = (int) Math.min(Math.max(0L, (long) nominalCapacity - energy), amount);
+        if (accepted > 0) { updateSnapshots(transaction); energy += accepted; }
+        return accepted;
+    }
+    @Override public long extract(long amount, TransactionContext transaction) {
+        if (amount < 0) throw new IllegalArgumentException("Negative energy extraction");
+        return 0;
+    }
+    @Override public boolean supportsInsertion() { return canReceive(); }
+    @Override public boolean supportsExtraction() { return false; }
+    @Override public long getAmount() { return energy; }
+    @Override public long getCapacity() { return capacity; }
+    @Override public int getEnergyStored() { return energy; }
+    @Override public int getMaxEnergyStored() { return capacity; }
+    @Override protected Integer createSnapshot() { return energy; }
+    @Override protected void readSnapshot(Integer value) { energy = value; capacity = Math.max(nominalCapacity, energy); }
+    @Override protected void onFinalCommit() { int previous = committedEnergy; committedEnergy = energy; changeListener.accept(previous); }
 
     private static int sanitizeCapacity(int capacity) {
         return Math.max(0, capacity);

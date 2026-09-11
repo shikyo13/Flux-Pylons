@@ -10,7 +10,7 @@ public final class FairEnergyDistributor {
 
     private FairEnergyDistributor() {}
 
-    /** The sender returns only the FE actually accepted by the indexed recipient. */
+    /** The sender returns only the E actually accepted by the indexed recipient. */
     public static Result distribute(long available, int[] limits, int cursor, IntBinaryOperator sender) {
         if (limits.length == 0 || available <= 0) return new Result(0, cursor);
         int count = limits.length;

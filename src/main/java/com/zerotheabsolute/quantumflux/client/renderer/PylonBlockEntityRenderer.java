@@ -374,7 +374,18 @@ public final class PylonBlockEntityRenderer implements BlockEntityRenderer<Quant
         return ((color >> shift) & 0xFF) / 255.0f;
     }
 
+    private static net.minecraft.client.renderer.culling.Frustum frameFrustum;
+
+    public static void setFrameFrustum(net.minecraft.client.renderer.culling.Frustum frustum) {
+        frameFrustum = frustum;
+    }
+
     @Override
+    public boolean shouldRender(QuantumPylonBlockEntity blockEntity, Vec3 cameraPosition) {
+        return BlockEntityRenderer.super.shouldRender(blockEntity, cameraPosition)
+                && (frameFrustum == null || frameFrustum.isVisible(getRenderBoundingBox(blockEntity)));
+    }
+
     public AABB getRenderBoundingBox(QuantumPylonBlockEntity blockEntity) {
         BlockPos source = blockEntity.getBlockPos();
         AABB bounds = new AABB(

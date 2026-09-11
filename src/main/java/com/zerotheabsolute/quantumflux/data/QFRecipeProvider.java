@@ -20,7 +20,7 @@ public class QFRecipeProvider extends RecipeProvider {
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput output) {
+    public void buildRecipes(RecipeOutput output) {
         // Flux Pylon: I E I / E D E / I R I
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, QFBlocks.QUANTUM_PYLON.get())
                 .pattern("IEI")

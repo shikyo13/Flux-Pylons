@@ -19,10 +19,10 @@ public final class QFConfig {
         ModConfigSpec.Builder server = new ModConfigSpec.Builder();
 
         server.comment("Flux Pylon settings").push("pylon");
-        PYLON_BUFFER_SIZE = server.comment("Internal energy buffer size (FE)")
+        PYLON_BUFFER_SIZE = server.comment("Internal energy buffer size (E)")
                 .defineInRange("pylonBufferSize", 100_000, 1_000, Integer.MAX_VALUE);
         MAX_TRANSFER_PER_TICK = server.comment(
-                        "Maximum average FE per tick across all connections (cycle budget scales with tickInterval)")
+                        "Maximum average E per tick across all connections (cycle budget scales with tickInterval)")
                 .defineInRange("maxTransferPerTick", 10_000, 100, Integer.MAX_VALUE);
         MAX_CONNECTIONS = server.comment("Maximum number of machines a single pylon can link to")
                 .defineInRange("maxConnections", 20, 1, 128);

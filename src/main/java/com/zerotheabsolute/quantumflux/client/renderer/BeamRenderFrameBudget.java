@@ -30,7 +30,7 @@ public final class BeamRenderFrameBudget {
 
     private BeamRenderFrameBudget() {}
 
-    /** Called exactly once by the NeoForge pre-frame event. */
+    /** Called exactly once by the Fabric world-render start event. */
     public static void beginFrame() {
         frameSequence++;
     }

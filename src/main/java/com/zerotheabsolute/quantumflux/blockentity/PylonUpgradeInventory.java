@@ -5,10 +5,10 @@ import com.zerotheabsolute.quantumflux.item.UpgradeType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import com.zerotheabsolute.quantumflux.inventory.ItemInventory;
 
-/** Four typed slots owned by the pylon; buffer removal cannot discard stored FE. */
-public final class PylonUpgradeInventory extends ItemStackHandler {
+/** Four typed slots owned by the pylon; buffer removal cannot discard stored E. */
+public final class PylonUpgradeInventory extends ItemInventory {
     private final QuantumPylonBlockEntity pylon;
 
     PylonUpgradeInventory(QuantumPylonBlockEntity pylon) {

@@ -33,25 +33,17 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@GameTestHolder(QuantumFlux.MODID)
-@PrefixGameTestTemplate(false)
 public final class UpgradeGameTests {
     private static final BlockPos PYLON = new BlockPos(2, 1, 2);
 
-    private UpgradeGameTests() {}
+    public UpgradeGameTests() {}
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void upgradeRecipesHaveUniqueCraftingResults(GameTestHelper helper) {
         var recipes = helper.getLevel().getRecipeManager();
         for (Item upgrade : upgradeItems()) {
@@ -73,7 +65,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void inventoryUpgradesChangeActualDeliveryAndSurviveReload(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -100,8 +92,8 @@ public final class UpgradeGameTests {
         helper.assertTrue(pylon.tryLink(receiver.getBlockPos()), "Receiver link");
         pylon.getEnergyStorage().receiveEnergy(100_000, false);
         tick(helper, pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 30_000, "Actual upgraded FE delivery");
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 70_000, "Only delivered FE was spent");
+        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 30_000, "Actual upgraded E delivery");
+        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 70_000, "Only delivered E was spent");
 
         var saved = pylon.saveWithoutMetadata(helper.getLevel().registryAccess());
         var restored = new QuantumPylonBlockEntity(pylon.getBlockPos(), pylon.getBlockState());
@@ -110,12 +102,12 @@ public final class UpgradeGameTests {
             helper.assertValueEqual(restored.getUpgrades().level(type), 4, "Saved upgrade level " + type);
         }
         helper.assertValueEqual(restored.getEffectiveBufferSize(), 1_600_000, "Reloaded upgrade capacity");
-        helper.assertValueEqual(restored.getEnergyStorage().getEnergyStored(), 70_000, "Reloaded stored FE");
+        helper.assertValueEqual(restored.getEnergyStorage().getEnergyStored(), 70_000, "Reloaded stored E");
         helper.assertValueEqual(restored.getConnections().size(), 1, "Reloaded links");
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void chargedBuffersCannotBeRemovedByInventoryActions(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -132,36 +124,33 @@ public final class UpgradeGameTests {
         menu.clicked(3, 0, ClickType.PICKUP_ALL, player);
         helper.assertValueEqual(menu.getCarried().getCount(), 1, "Double click removed a locked buffer");
         menu.setCarried(ItemStack.EMPTY);
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 1_500_000, "Rejected removal lost stored FE");
+        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 1_500_000, "Rejected removal lost stored E");
         helper.assertTrue(pylon.getUpgrades().extractItem(3, 4, false).isEmpty(), "Direct handler extraction bypassed the lock");
 
         pylon.getEnergyStorage().consumeEnergy(1_400_000);
         menu.clicked(3, 0, ClickType.QUICK_MOVE, player);
         helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.BUFFER), 0, "Drained buffer removal");
         helper.assertValueEqual(countInventory(player, QFItems.BUFFER_UPGRADE.get()), 4, "Recovered buffer items");
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 100_000, "Removal retained stored FE");
+        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 100_000, "Removal retained stored E");
         helper.assertValueEqual(pylon.getEnergyStorage().getMaxEnergyStored(), 100_000, "Capacity after removal");
 
         var reducedConfiguration = pylon.saveWithoutMetadata(helper.getLevel().registryAccess());
         reducedConfiguration.putInt("Energy", 900_000);
         pylon.loadWithComponents(reducedConfiguration, helper.getLevel().registryAccess());
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 900_000, "Old larger buffer must not lose FE on load");
-        helper.assertValueEqual(pylon.getEnergyStorage().receiveEnergy(1, false), 0, "Excess storage accepted new FE");
+        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 900_000, "Old larger buffer must not lose E on load");
+        helper.assertValueEqual(pylon.getEnergyStorage().receiveEnergy(1, false), 0, "Excess storage accepted new E");
         pylon.getEnergyStorage().consumeEnergy(800_001);
         helper.assertValueEqual(pylon.getEnergyStorage().getMaxEnergyStored(), 100_000, "Drained excess capacity");
         helper.assertValueEqual(pylon.getEnergyStorage().receiveEnergy(2, false), 1, "Input resumes at the new capacity");
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void upgradeReadingsSurviveVanillaShortTransport(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
         var server = menu(player, pylon);
-        var extra = new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());
-        extra.writeBlockPos(pylon.getBlockPos());
-        var client = new PylonUpgradeMenu(1, new Inventory(player), extra);
-        extra.release();
+        var client = new PylonUpgradeMenu(1, new Inventory(player), pylon.getBlockPos());
         server.setSynchronizer(new ContainerSynchronizer() {
             @Override public void sendInitialData(AbstractContainerMenu menu, NonNullList<ItemStack> stacks,
                                                   ItemStack carried, int[] data) {
@@ -183,12 +172,12 @@ public final class UpgradeGameTests {
         helper.assertValueEqual(client.bufferLimit(), 1_600_000, "Client capacity above 16 bits");
         helper.assertValueEqual(client.storedEnergy(), 1_567_890, "Client energy with signed low word");
         helper.assertValueEqual(client.baseBufferLimit(), 100_000, "Server-configured base capacity");
-        helper.assertFalse(client.canRemoveBuffers(), "Client buffer lock");
+        helper.assertTrue(!(client.canRemoveBuffers()), "Client buffer lock");
         helper.assertValueEqual(client.previewValue(UpgradeType.RANGE, 1), 20, "Client next-upgrade preview");
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void downgradeRetainsInactiveLinksAndRestoringUpgradesResumesDelivery(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         pylon.getUpgrades().insertItem(0, new ItemStack(QFItems.RANGE_UPGRADE.get(), 4), false);
@@ -225,7 +214,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void breakingEitherHalfDropsEachInstalledUpgradeOnce(GameTestHelper helper) {
         for (boolean top : new boolean[]{false, true}) {
             BlockPos relative = top ? PYLON.offset(6, 0, 0) : PYLON;
@@ -251,7 +240,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void explosionAtEitherHalfDropsUpgradesOnceAndUnregistersPylon(GameTestHelper helper) {
         var level = helper.getLevel();
         var manager = QuantumFluxNetworkManager.get(level);
@@ -272,7 +261,7 @@ public final class UpgradeGameTests {
             blast.finalizeExplosion(false);
             helper.assertTrue(level.getBlockState(pylon.getBlockPos()).isAir(), "Bottom survived explosion");
             helper.assertTrue(level.getBlockState(pylon.getBlockPos().above()).isAir(), "Top survived explosion");
-            helper.assertFalse(network.hasPylon(pylon.getBlockPos()), "Destroyed pylon remains registered");
+            helper.assertTrue(!(network.hasPylon(pylon.getBlockPos())), "Destroyed pylon remains registered");
             // A repeated blast resolution must not recover a second inventory.
             blast.finalizeExplosion(false);
             var drops = level.getEntitiesOfClass(ItemEntity.class, new AABB(pylon.getBlockPos()).inflate(1.5));
@@ -288,7 +277,7 @@ public final class UpgradeGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = "empty")
+    @GameTest(template = "quantumflux:empty")
     public static void openUpgradeMenuRechecksMembershipRangeAndClaims(GameTestHelper helper) {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
@@ -310,12 +299,12 @@ public final class UpgradeGameTests {
         helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Distant player installed an upgrade");
         player.setPos(pylon.getBlockPos().getCenter());
         var denied = new DenyInteraction(pylon.getBlockPos());
-        NeoForge.EVENT_BUS.register(denied);
+        denied.enable();
         try {
             menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
             helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Claim denial was bypassed");
         } finally {
-            NeoForge.EVENT_BUS.unregister(denied);
+            denied.disable();
         }
         helper.assertValueEqual(player.getInventory().getItem(9).getCount(), 4, "Denied clicks lost player items");
         menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
@@ -344,7 +333,7 @@ public final class UpgradeGameTests {
     }
 
     private static ServerPlayer player(GameTestHelper helper, QuantumPylonBlockEntity pylon) {
-        var player = FakePlayerFactory.get(helper.getLevel(), new GameProfile(UUID.randomUUID(), "QFUpgrades"));
+        var player = net.fabricmc.fabric.api.entity.FakePlayer.get(helper.getLevel(), new GameProfile(UUID.randomUUID(), "QFUpgrades"));
         player.setPos(pylon.getBlockPos().getCenter());
         var gadget = new ItemStack(QFItems.QUANTUM_GADGET.get());
         gadget.set(QFDataComponents.GADGET_ACTIVE.get(), true);
@@ -365,9 +354,14 @@ public final class UpgradeGameTests {
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pylon.getBlockPos(), pylon.getBlockState(), pylon);
     }
 
-    private record DenyInteraction(BlockPos pos) {
-        @SubscribeEvent public void deny(PlayerInteractEvent.RightClickBlock event) {
-            if (event.getPos().equals(pos)) event.setCanceled(true);
+    private static final class DenyInteraction {
+        private boolean enabled;
+        DenyInteraction(BlockPos pos) {
+            net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) ->
+                    enabled && pos.equals(hit.getBlockPos()) ? net.minecraft.world.InteractionResult.FAIL
+                            : net.minecraft.world.InteractionResult.PASS);
         }
+        void enable() { enabled = true; }
+        void disable() { enabled = false; }
     }
 }

@@ -30,7 +30,7 @@ final class FluxTutorialScenes {
     }
 
     static void render(GuiGraphics graphics, int chapter, double time) {
-        // A diagram uses the real item models; the generic FE nodes do not imply a vanilla machine accepts FE.
+        // A diagram uses the real item models; the generic E nodes do not imply a vanilla machine accepts E.
         graphics.pose().pushPose();
         graphics.pose().scale(480f / 3440, 180f / 1290, 1);
         graphics.blit(BACKDROP, 0, 0, 0, 0, 3440, 1290, 3440, 1440);
@@ -205,7 +205,7 @@ final class FluxTutorialScenes {
     private static void node(GuiGraphics graphics, int x, int y, Component label, double stored, int color) {
         panel(graphics, x - 26, y - 17, 52, 34);
         graphics.renderOutline(x - 26, y - 17, 52, 34, color);
-        label(graphics, Component.literal("FE"), x, y - 10, color);
+        label(graphics, Component.literal("E"), x, y - 10, color);
         graphics.fill(x - 18, y + 4, x + 18, y + 8, 0xFF35464C);
         graphics.fill(x - 18, y + 4, x - 18 + (int) (36 * stored), y + 8, color);
         label(graphics, label, x, y + 21, MUTED);

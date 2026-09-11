@@ -43,3 +43,6 @@ repo
 
 # Runtime logs from local test launches
 logs/
+
+# Fabric GameTest runtime
+/runGameTest/

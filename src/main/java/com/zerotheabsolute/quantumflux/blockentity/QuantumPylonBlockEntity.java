@@ -29,7 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import com.zerotheabsolute.quantumflux.energy.EnergyReceiver;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -123,7 +123,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         }
 
         // Phase 3: update block state (both halves)
-        // A fully utilized pylon can deliver every incoming FE and finish the
+        // A fully utilized pylon can deliver every incoming E and finish the
         // tick empty. Keep its field lit while current/recent output is flowing.
         boolean shouldBeActive = self.energyStorage.getEnergyStored() > 0
                 || self.accumulatedThroughput > 0 || self.totalThroughput > 0;
@@ -178,7 +178,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
             }
             // Keep links outside a reduced range as inactive configuration.
             // Restoring range resumes them; the controller explains the limit.
-            // A machine may temporarily disable its FE input (side settings,
+            // A machine may temporarily disable its E input (side settings,
             // redstone control, or multiblock rebuilding). Retain the link so
             // delivery resumes when the capability becomes available again.
 
@@ -302,14 +302,14 @@ public class QuantumPylonBlockEntity extends BlockEntity {
                 if (sent == offered) stillAccepting.add(connection);
             }
 
-            // With a one-FE budget, a full first target can reject the only
+            // With a one-E budget, a full first target can reject the only
             // nonzero offer. Continue after dropping it so later targets get
             // a chance, even though this pass delivered nothing.
             if (transferredThisPass == 0 && stillAccepting.size() == accepting.size()) break;
             accepting = stillAccepting;
         }
 
-        // Some FE adapters accept only whole native-energy increments. A fair
+        // Some E adapters accept only whole native-energy increments. A fair
         // share can be too small even when the pooled remainder is usable.
         // Offer that remainder once per target; keep anything still rejected
         // in the source buffer until more energy arrives.
@@ -379,7 +379,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
         // Internal (null-side) access may bypass a machine's input settings.
         for (Direction dir : Direction.values()) {
-            IEnergyStorage storage = EnergyHelper.getEnergyCapability(level, target, dir);
+            EnergyReceiver storage = EnergyHelper.getEnergyCapability(level, target, dir);
             if (storage != null && storage.canReceive()) {
                 int accepted = Math.max(0, Math.min(maxAmount, storage.receiveEnergy(maxAmount, false)));
                 if (accepted > 0) return accepted;
@@ -437,7 +437,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
     /** Send a sync payload to a specific player (used when opening GUI). */
     public void sendSyncTo(net.minecraft.server.level.ServerPlayer player) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, buildSyncPayload());
+        com.zerotheabsolute.quantumflux.network.QFPackets.sendToPlayer(player, buildSyncPayload());
     }
 
     // ══════════════════════════════════════════
@@ -475,7 +475,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
     private void syncToTrackingClients() {
         if (level == null || level.isClientSide) return;
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(
+        com.zerotheabsolute.quantumflux.network.QFPackets.sendToPlayersTrackingChunk(
                 (net.minecraft.server.level.ServerLevel) level,
                 new ChunkPos(getBlockPos()),
                 buildSyncPayload());
@@ -489,7 +489,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
                 .map(connection -> new PylonTelemetryPayload.ConnectionReading(
                         connection.getLastTransferred(), describeConnection(connection, availableEnergy)))
                 .toList();
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(
+        com.zerotheabsolute.quantumflux.network.QFPackets.sendToPlayersTrackingChunk(
                 (net.minecraft.server.level.ServerLevel) level,
                 new ChunkPos(getBlockPos()),
                 new PylonTelemetryPayload(getBlockPos(), energyStorage.getEnergyStored(),
@@ -497,7 +497,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
                         availableEnergy, isOutputEnabled(), readings));
     }
 
-    /** Spendable FE only; this never loads a sibling chunk. */
+    /** Spendable E only; this never loads a sibling chunk. */
     public long getAvailableEnergy() {
         if (networkId != null && level instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             QFNetwork network = QuantumFluxNetworkManager.get(serverLevel).getNetwork(networkId);
@@ -530,12 +530,12 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         boolean allKnownFull = true;
         boolean accepts = false;
         for (Direction face : Direction.values()) {
-            IEnergyStorage input = EnergyHelper.getEnergyCapability(level, target, face);
+            EnergyReceiver input = EnergyHelper.getEnergyCapability(level, target, face);
             if (input == null || !input.canReceive()) continue;
             hasInput = true;
             int capacity = input.getMaxEnergyStored();
             if (capacity <= 0 || input.getEnergyStored() < capacity) allKnownFull = false;
-            // Simulation diagnoses current acceptance without consuming FE.
+            // Simulation diagnoses current acceptance without consuming E.
             if (input.receiveEnergy(getCycleTransferLimit(), true) > 0) accepts = true;
         }
         if (!hasInput) return ConnectionStatus.INPUT_UNAVAILABLE;

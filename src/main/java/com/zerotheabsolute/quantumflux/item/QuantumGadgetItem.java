@@ -259,7 +259,6 @@ public class QuantumGadgetItem extends Item {
     //  Hotbar popup
     // ══════════════════════════════════════════
 
-    @Override
     public Component getHighlightTip(ItemStack stack, Component displayName) {
         boolean active = Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
         return Component.empty()

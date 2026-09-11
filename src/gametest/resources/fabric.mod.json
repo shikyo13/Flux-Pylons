@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "quantumflux_gametest",
+  "version": "1.0.0",
+  "name": "Flux Pylons GameTests",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.zerotheabsolute.quantumflux.gametest.FabricTestBootstrap"
+    ],
+    "fabric-gametest": [
+      "com.zerotheabsolute.quantumflux.gametest.QuantumFluxGameTests",
+      "com.zerotheabsolute.quantumflux.gametest.UpgradeGameTests",
+      "com.zerotheabsolute.quantumflux.network.QFNetworkingGameTests"
+    ]
+  },
+  "depends": {
+    "quantumflux": "*"
+  }
+}

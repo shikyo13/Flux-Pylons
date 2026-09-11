@@ -20,21 +20,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
-@GameTestHolder(QuantumFlux.MODID)
-@PrefixGameTestTemplate(false)
 public final class QFNetworkingGameTests {
 
-    private static final String EMPTY_TEMPLATE = "empty";
+    private static final String EMPTY_TEMPLATE = "quantumflux:empty";
     private static final BlockPos PYLON_POS = new BlockPos(2, 1, 2);
 
-    private QFNetworkingGameTests() {}
+    public QFNetworkingGameTests() {}
 
     @GameTest(template = EMPTY_TEMPLATE)
     public static void gadgetPayloadEnforcesHeldItemRangeOwnershipAndClaims(GameTestHelper helper) {
@@ -79,13 +71,13 @@ public final class QFNetworkingGameTests {
                 "Unauthorized network mutation result");
 
         DenyInteraction listener = new DenyInteraction(absolutePos);
-        NeoForge.EVENT_BUS.register(listener);
+        listener.enable();
         try {
             helper.assertValueEqual(QFNetworking.processGadgetAction(valid, owner),
                     ActionResultS2CPayload.Result.NOT_ALLOWED,
                     "Claim-denied payload result");
         } finally {
-            NeoForge.EVENT_BUS.unregister(listener);
+            listener.disable();
         }
 
         GadgetActionPayload invalidOrdinal = new GadgetActionPayload(
@@ -112,7 +104,7 @@ public final class QFNetworkingGameTests {
         helper.assertValueEqual(QFNetworking.processGadgetAction(exactTarget, owner),
                 ActionResultS2CPayload.Result.APPLIED,
                 "Stable unlink target result");
-        helper.assertFalse(pylon.isLinkedTo(targetPos),
+        helper.assertTrue(!(pylon.isLinkedTo(targetPos)),
                 "Exact stable target remained linked");
         helper.succeed();
     }
@@ -127,7 +119,7 @@ public final class QFNetworkingGameTests {
         for (int index = 0; index < 40; index++) {
             ActionResultS2CPayload.Result result = QFNetworking.processGadgetAction(
                     priorityPayload(absolutePos, modes[index % modes.length], index + 1), owner);
-            helper.assertFalse(result == ActionResultS2CPayload.Result.RATE_LIMITED,
+            helper.assertTrue(!(result == ActionResultS2CPayload.Result.RATE_LIMITED),
                     "Payload was rate-limited before the configured limit");
         }
         helper.assertValueEqual(QFNetworking.processGadgetAction(
@@ -145,7 +137,7 @@ public final class QFNetworkingGameTests {
         var network = manager.getNetwork(fixture.pylon().getNetworkId());
         fixture.pylon().getEnergyStorage().receiveEnergy(73, false);
         BlockPos unloaded = fixture.pylon().getBlockPos().offset(1_000_000, 0, 1_000_000);
-        helper.assertFalse(level.hasChunkAt(unloaded), "Remote fixture chunk must start unloaded");
+        helper.assertTrue(!(level.hasChunkAt(unloaded)), "Remote fixture chunk must start unloaded");
         helper.assertTrue(manager.addPylon(network.getUuid(), unloaded), "Persisted unloaded member must register");
 
         ServerPlayer owner = fixture.owner();
@@ -157,8 +149,8 @@ public final class QFNetworkingGameTests {
         var reading = QFNetworking.selectedNetworkTelemetry(owner, manager, snapshots);
         helper.assertTrue(reading != null, "Owner must receive network readings beyond local interaction distance");
         helper.assertTrue(reading.energy() == 73 && reading.loadedPylons() == 1 && reading.pylons().size() == 2,
-                "Remote readings must distinguish spendable FE and loaded versus total membership");
-        helper.assertFalse(level.hasChunkAt(unloaded), "Telemetry must not force-load a member chunk");
+                "Remote readings must distinguish spendable E and loaded versus total membership");
+        helper.assertTrue(!(level.hasChunkAt(unloaded)), "Telemetry must not force-load a member chunk");
 
         ServerPlayer guest = makeFakePlayer(helper, "QFReadingsGuest");
         guest.setItemInHand(InteractionHand.MAIN_HAND, gadget.copy());
@@ -220,7 +212,7 @@ public final class QFNetworkingGameTests {
     }
 
     private static ServerPlayer makeFakePlayer(GameTestHelper helper, String name) {
-        return FakePlayerFactory.get(
+        return net.fabricmc.fabric.api.entity.FakePlayer.get(
                 helper.getLevel(), new GameProfile(java.util.UUID.randomUUID(), name));
     }
 
@@ -233,15 +225,13 @@ public final class QFNetworkingGameTests {
     private record Fixture(ServerPlayer owner, QuantumPylonBlockEntity pylon) {}
 
     private static final class DenyInteraction {
-        private final BlockPos deniedPos;
-
-        private DenyInteraction(BlockPos deniedPos) {
-            this.deniedPos = deniedPos;
+        private boolean enabled;
+        DenyInteraction(BlockPos pos) {
+            net.fabricmc.fabric.api.event.player.UseBlockCallback.EVENT.register((player, level, hand, hit) ->
+                    enabled && pos.equals(hit.getBlockPos()) ? net.minecraft.world.InteractionResult.FAIL
+                            : net.minecraft.world.InteractionResult.PASS);
         }
-
-        @SubscribeEvent
-        public void deny(PlayerInteractEvent.RightClickBlock event) {
-            if (deniedPos.equals(event.getPos())) event.setCanceled(true);
-        }
+        void enable() { enabled = true; }
+        void disable() { enabled = false; }
     }
 }

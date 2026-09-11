@@ -6,70 +6,38 @@ import com.zerotheabsolute.quantumflux.init.QFDataComponents;
 import com.zerotheabsolute.quantumflux.item.QuantumGadgetItem;
 import com.zerotheabsolute.quantumflux.network.QFNetworking;
 import com.zerotheabsolute.quantumflux.network.data.QuantumFluxNetworkManager;
-import net.minecraft.server.level.ServerLevel;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.ChunkWatchEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-public class GadgetInteractionHandler {
-
-    @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
-        QFNetworking.flushNetworkListBroadcasts();
-        QFNetworking.refreshActiveGadgetNetworkLists(event.getServer());
-    }
-
-    @SubscribeEvent
-    public static void onChunkSent(ChunkWatchEvent.Sent event) {
-        for (var blockEntity : event.getChunk().getBlockEntities().values()) {
-            if (blockEntity instanceof com.zerotheabsolute.quantumflux.blockentity.QuantumPylonBlockEntity pylon) {
-                pylon.sendSyncTo(event.getPlayer());
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp && sp.level() instanceof ServerLevel serverLevel) {
-            clearInvalidGadgetDimensionState(sp, false);
-            QuantumFluxNetworkManager manager = QuantumFluxNetworkManager.get(serverLevel);
-            QFNetworking.sendNetworkListToPlayer(sp, manager);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp && sp.level() instanceof ServerLevel serverLevel) {
-            clearInvalidGadgetDimensionState(sp, true);
-            QFNetworking.sendNetworkListToPlayer(sp, QuantumFluxNetworkManager.get(serverLevel));
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        ItemStack stack = event.getItemStack();
-        if (!(stack.getItem() instanceof QuantumGadgetItem)) return;
-
-        // Gadget must be active for linking interactions
-        if (!Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()))) return;
-
-        QFDataComponents.LinkingData linkData = stack.get(QFDataComponents.LINKING_DATA.get());
-        if (linkData == null || !linkData.active()) return;
-
-        // Don't intercept clicks on our own pylon — useOn handles those
-        if (event.getLevel().getBlockState(event.getPos()).getBlock() instanceof QuantumPylonBlock) return;
-
-        // Intercept before the target block opens its GUI
-        if (QuantumGadgetItem.handleLinkInteraction(
-                event.getEntity(), event.getLevel(), event.getPos(), stack)) {
-            event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(event.getLevel().isClientSide));
-        }
+public final class GadgetInteractionHandler {
+    public static void register() {
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            QFNetworking.flushNetworkListBroadcasts();
+            QFNetworking.refreshActiveGadgetNetworkLists(server);
+        });
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayer player = handler.player;
+            clearInvalidGadgetDimensionState(player, false);
+            QFNetworking.sendNetworkListToPlayer(player, QuantumFluxNetworkManager.get(player.serverLevel()));
+        });
+        ServerEntityWorldChangeEvents.AFTER_PLAYER_CHANGE_WORLD.register((player, origin, destination) -> {
+            clearInvalidGadgetDimensionState(player, true);
+            QFNetworking.sendNetworkListToPlayer(player, QuantumFluxNetworkManager.get(destination));
+        });
+        UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
+            ItemStack stack = player.getItemInHand(hand);
+            if (player.isSpectator() || !(stack.getItem() instanceof QuantumGadgetItem)
+                    || !Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()))) return InteractionResult.PASS;
+            var linking = stack.get(QFDataComponents.LINKING_DATA.get());
+            if (linking == null || !linking.active() || level.getBlockState(hit.getBlockPos()).getBlock() instanceof QuantumPylonBlock) return InteractionResult.PASS;
+            return QuantumGadgetItem.handleLinkInteraction(player, level, hit.getBlockPos(), stack)
+                    ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
+        });
     }
 
     private static void clearInvalidGadgetDimensionState(ServerPlayer player, boolean clearSelection) {

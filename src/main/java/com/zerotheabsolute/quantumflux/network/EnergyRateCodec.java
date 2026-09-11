@@ -2,7 +2,7 @@ package com.zerotheabsolute.quantumflux.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 
-/** Exact twentieth-FE rates encoded as the integer FE measured over 20 ticks. */
+/** Exact twentieth-E rates encoded as the integer E measured over 20 ticks. */
 final class EnergyRateCodec {
     private static final long MAX_SAMPLE = (long) Integer.MAX_VALUE * 20;
 

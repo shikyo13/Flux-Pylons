@@ -1,17 +1,18 @@
 package com.zerotheabsolute.quantumflux.init;
 
 import com.zerotheabsolute.quantumflux.QuantumFlux;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 import com.zerotheabsolute.quantumflux.block.QuantumPylonBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class QFBlocks {
 
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(QuantumFlux.MODID);
+    private static final RegistryEntries<Block> BLOCKS = new RegistryEntries<>(BuiltInRegistries.BLOCK);
 
-    public static final DeferredBlock<QuantumPylonBlock> QUANTUM_PYLON = BLOCKS.register(
+    public static final Supplier<QuantumPylonBlock> QUANTUM_PYLON = BLOCKS.register(
             "quantum_pylon",
             () -> new QuantumPylonBlock(
                     BlockBehaviour.Properties.of()
@@ -23,5 +24,6 @@ public final class QFBlocks {
             )
     );
 
+    public static void register() {}
     private QFBlocks() {}
 }

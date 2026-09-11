@@ -60,7 +60,8 @@ public class QuantumFluxNetworkManager extends SavedData {
         return level.getDataStorage().computeIfAbsent(
                 new Factory<>(
                         QuantumFluxNetworkManager::new,
-                        QuantumFluxNetworkManager::load
+                        QuantumFluxNetworkManager::load,
+                        null
                 ),
                 DATA_NAME
         );

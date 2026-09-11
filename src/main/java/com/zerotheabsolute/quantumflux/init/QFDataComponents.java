@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.zerotheabsolute.quantumflux.QuantumFlux;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
@@ -11,8 +13,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.UUID;
 
@@ -30,8 +30,7 @@ public final class QFDataComponents {
                 : DataResult.error(() -> "Invalid dimension identifier: " + value);
     });
 
-    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
-            DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, QuantumFlux.MODID);
+    private static final RegistryEntries<DataComponentType<?>> DATA_COMPONENTS = new RegistryEntries<>(BuiltInRegistries.DATA_COMPONENT_TYPE);
 
     // ── LinkingData record ──
     public record LinkingData(String dimension, BlockPos pylonPos, boolean active) {
@@ -53,14 +52,14 @@ public final class QFDataComponents {
         );
     }
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<LinkingData>> LINKING_DATA =
+    public static final Supplier<DataComponentType<LinkingData>> LINKING_DATA =
             DATA_COMPONENTS.register("linking_data", () ->
                     DataComponentType.<LinkingData>builder()
                             .persistent(LinkingData.CODEC)
                             .networkSynchronized(LinkingData.STREAM_CODEC)
                             .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> GADGET_COLOR =
+    public static final Supplier<DataComponentType<Integer>> GADGET_COLOR =
             DATA_COMPONENTS.register("gadget_color", () ->
                     DataComponentType.<Integer>builder()
                             .persistent(Codec.INT)
@@ -68,7 +67,7 @@ public final class QFDataComponents {
                                     FriendlyByteBuf::writeInt, FriendlyByteBuf::readInt))
                             .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> GADGET_ACTIVE =
+    public static final Supplier<DataComponentType<Boolean>> GADGET_ACTIVE =
             DATA_COMPONENTS.register("gadget_active", () ->
                     DataComponentType.<Boolean>builder()
                             .persistent(Codec.BOOL)
@@ -76,7 +75,7 @@ public final class QFDataComponents {
                                     FriendlyByteBuf::writeBoolean, FriendlyByteBuf::readBoolean))
                             .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> SELECTED_NETWORK =
+    public static final Supplier<DataComponentType<UUID>> SELECTED_NETWORK =
             DATA_COMPONENTS.register("selected_network", () ->
                     DataComponentType.<UUID>builder()
                             .persistent(UUIDUtil.CODEC)
@@ -86,7 +85,7 @@ public final class QFDataComponents {
                             .build());
 
     /** Dimension in which SELECTED_NETWORK is valid. Kept separate for compatibility with existing UUID data. */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> SELECTED_NETWORK_DIMENSION =
+    public static final Supplier<DataComponentType<String>> SELECTED_NETWORK_DIMENSION =
             DATA_COMPONENTS.register("selected_network_dimension", () ->
                     DataComponentType.<String>builder()
                             .persistent(DIMENSION_ID_CODEC)
@@ -95,5 +94,6 @@ public final class QFDataComponents {
                                     buf -> buf.readUtf(MAX_DIMENSION_ID_LENGTH)))
                             .build());
 
+    public static void register() {}
     private QFDataComponents() {}
 }

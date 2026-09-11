@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "quantumflux",
+  "version": "${version}",
+  "name": "Flux Pylons",
+  "description": "Power nearby machines wirelessly, keeping their faces free.",
+  "authors": [
+    "ZeroTheAbsolute"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/flux-pylons",
+    "sources": "https://github.com/shikyo13/Flux-Pylons/tree/mc/1.21.1-fabric",
+    "issues": "https://github.com/shikyo13/Flux-Pylons/issues"
+  },
+  "license": "LicenseRef-Flux-Pylons-1.1",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.zerotheabsolute.quantumflux.QuantumFlux"
+    ],
+    "client": [
+      "com.zerotheabsolute.quantumflux.client.ClientEventHandler"
+    ],
+    "fabric-datagen": [
+      "com.zerotheabsolute.quantumflux.data.QFDataGenerator"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.14",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": ">=0.116.0",
+    "team_reborn_energy": ">=4.1.0 <4.2",
+    "forgeconfigapiport": ">=21.1.0 <21.2"
+  },
+  "custom": {
+    "modrinth": {
+      "environments": {
+        "client": "required",
+        "server": "required"
+      }
+    }
+  },
+  "mixins": [
+    "quantumflux.mixins.json"
+  ]
+}

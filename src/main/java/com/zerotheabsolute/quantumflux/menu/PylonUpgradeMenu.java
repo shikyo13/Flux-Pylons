@@ -20,8 +20,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import com.zerotheabsolute.quantumflux.inventory.ItemInventory;
+
 import org.jetbrains.annotations.Nullable;
 
 /** Vanilla inventory synchronization and click handling for the four upgrade slots. */
@@ -31,8 +31,8 @@ public final class PylonUpgradeMenu extends AbstractContainerMenu {
     @Nullable private final QuantumPylonBlockEntity pylon;
     private final ContainerData data;
 
-    public PylonUpgradeMenu(int id, Inventory inventory, RegistryFriendlyByteBuf extra) {
-        this(id, inventory, extra.readBlockPos(), null, new ItemStackHandler(4) {
+    public PylonUpgradeMenu(int id, Inventory inventory, BlockPos extra) {
+        this(id, inventory, extra, null, new ItemInventory(4) {
             @Override public int getSlotLimit(int slot) { return UpgradeType.MAX_LEVEL; }
             @Override public boolean isItemValid(int slot, ItemStack stack) {
                 return stack.getItem() instanceof QuantumUpgradeItem item && item.type().ordinal() == slot;
@@ -45,21 +45,24 @@ public final class PylonUpgradeMenu extends AbstractContainerMenu {
     }
 
     private PylonUpgradeMenu(int id, Inventory inventory, BlockPos pos, @Nullable QuantumPylonBlockEntity pylon,
-                             ItemStackHandler upgrades, ContainerData data) {
+                             ItemInventory upgrades, ContainerData data) {
         super(QFMenus.PYLON_UPGRADES.get(), id);
         this.pos = pos;
         this.pylon = pylon;
         this.data = data;
         for (int slot = 0; slot < 4; slot++) {
-            addSlot(new SlotItemHandler(upgrades, slot, 19 + slot * 60, 39) {
+            final int upgradeSlot = slot;
+            addSlot(new Slot(upgrades, slot, 19 + slot * 60, 39) {
+                @Override public boolean mayPlace(ItemStack stack) { return upgrades.isItemValid(upgradeSlot, stack); }
+                @Override public int getMaxStackSize() { return upgrades.getSlotLimit(upgradeSlot); }
                 @Override public void setChanged() {
                     super.setChanged();
                     // Vanilla shift-click merges can grow the live stack without
-                    // calling ItemStackHandler.setStackInSlot.
+                    // calling ItemInventory.setStackInSlot.
                     if (pylon != null) pylon.onUpgradesChanged();
                 }
                 @Override public boolean mayPickup(Player player) {
-                    return (getSlotIndex() != UpgradeType.BUFFER.ordinal() || canRemoveBuffers()) && super.mayPickup(player);
+                    return (upgradeSlot != UpgradeType.BUFFER.ordinal() || canRemoveBuffers()) && super.mayPickup(player);
                 }
             });
         }

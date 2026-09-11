@@ -3,10 +3,10 @@
 ## The pylon has power but my machine does not
 
 1. Open the pylon's machine list. Confirm that the machine is linked and read its status or tooltip.
-2. Enable an external FE input in the machine's side configuration. A machine that only exposes internal storage cannot receive wireless power.
+2. Enable an external energy input in the machine's side configuration. A machine that only exposes internal storage cannot receive wireless power.
 3. Confirm the machine is in range and its chunk is loaded.
 4. Read the pylon's redstone rule. **Signal required** waits for a signal; **Signal pauses** stops output while a signal is present.
-5. Confirm the machine actually has demand. A full machine will not accept more FE.
+5. Confirm the machine actually has demand. A full machine will not accept more energy.
 
 ## The local buffer reads zero
 
@@ -22,7 +22,7 @@ Switch on the gadget, move close to the pylon, and confirm that you are the netw
 
 ## I cannot remove a buffer upgrade
 
-Let connected machines drain storage to the server's configured base capacity first. Removing the upgrade then preserves the remaining FE.
+Let connected machines drain storage to the server's configured base capacity first. Removing the upgrade then preserves the remaining energy.
 
 ## I cannot find the animated guide
 
