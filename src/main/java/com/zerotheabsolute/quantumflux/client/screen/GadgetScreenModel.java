@@ -65,8 +65,8 @@ final class GadgetScreenModel {
 
     static int liveEnergyPercent(UUID networkId, int fallback) {
         Telemetry telemetry = telemetry(networkId);
-        if (telemetry.capacity() <= 0) return Math.clamp(fallback, 0, 100);
-        return (int) Math.clamp(telemetry.energy() * 100L / telemetry.capacity(), 0L, 100L);
+        if (telemetry.capacity() <= 0) return com.zerotheabsolute.quantumflux.util.Numbers.clamp(fallback, 0, 100);
+        return (int) com.zerotheabsolute.quantumflux.util.Numbers.clamp(telemetry.energy() * 100L / telemetry.capacity(), 0L, 100L);
     }
 
     static Component networkRowLabel(NetworkListSyncS2CPayload.NetworkSummary network) {

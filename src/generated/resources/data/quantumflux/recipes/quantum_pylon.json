@@ -21,7 +21,7 @@
     "IRI"
   ],
   "result": {
-    "count": 1,
-    "id": "quantumflux:quantum_pylon"
-  }
+    "item": "quantumflux:quantum_pylon"
+  },
+  "show_notification": true
 }

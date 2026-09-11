@@ -8,8 +8,8 @@ import com.zerotheabsolute.quantumflux.network.data.QuantumFluxNetworkManager;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 
@@ -19,11 +19,11 @@ import java.util.UUID;
 
 /** Selected-network readings, including pylons outside the player's tracking distance. */
 public record NetworkTelemetryPayload(UUID networkId, long sampleTick, List<PylonSummary> pylons)
-        implements CustomPacketPayload {
+        implements QFPayload {
     public static final Type<NetworkTelemetryPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "network_telemetry"));
-    public static final StreamCodec<FriendlyByteBuf, NetworkTelemetryPayload> STREAM_CODEC =
-            StreamCodec.of(NetworkTelemetryPayload::write, NetworkTelemetryPayload::read);
+            new ResourceLocation(QuantumFlux.MODID, "network_telemetry"));
+    public static final PacketCodec<FriendlyByteBuf, NetworkTelemetryPayload> STREAM_CODEC =
+            PacketCodec.of(NetworkTelemetryPayload::write, NetworkTelemetryPayload::read);
 
     public enum Availability { LOADED, UNLOADED, MISSING }
 
@@ -107,9 +107,9 @@ public record NetworkTelemetryPayload(UUID networkId, long sampleTick, List<Pylo
             int energy = Math.max(0, buf.readVarInt());
             int capacity = Math.max(0, buf.readVarInt());
             double rate = EnergyRateCodec.read(buf);
-            int connections = Math.clamp(buf.readVarInt(), 0, PylonSyncPayload.MAX_SYNCED_CONNECTIONS);
-            int range = Math.clamp(buf.readVarInt(), 1, 256);
-            int maxConnections = Math.clamp(buf.readVarInt(), 1, PylonSyncPayload.MAX_SYNCED_CONNECTIONS);
+            int connections = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 0, PylonSyncPayload.MAX_SYNCED_CONNECTIONS);
+            int range = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 1, 256);
+            int maxConnections = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 1, PylonSyncPayload.MAX_SYNCED_CONNECTIONS);
             int limit = Math.max(0, buf.readVarInt());
             boolean outputEnabled = buf.readBoolean();
             pylons.add(new PylonSummary(pos, state, Math.min(energy, capacity), capacity,
@@ -118,5 +118,5 @@ public record NetworkTelemetryPayload(UUID networkId, long sampleTick, List<Pylo
         return new NetworkTelemetryPayload(networkId, sampleTick, pylons);
     }
 
-    @Override public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    @Override public Type<? extends QFPayload> type() { return TYPE; }
 }

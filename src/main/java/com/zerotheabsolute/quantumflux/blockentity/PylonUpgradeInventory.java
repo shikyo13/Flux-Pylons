@@ -26,7 +26,7 @@ public final class PylonUpgradeInventory extends ItemInventory {
 
     public int level(UpgradeType type) {
         ItemStack stack = getStackInSlot(type.ordinal());
-        return isItemValid(type.ordinal(), stack) ? Math.clamp(stack.getCount(), 0, UpgradeType.MAX_LEVEL) : 0;
+        return isItemValid(type.ordinal(), stack) ? com.zerotheabsolute.quantumflux.util.Numbers.clamp(stack.getCount(), 0, UpgradeType.MAX_LEVEL) : 0;
     }
 
     @Override
@@ -39,10 +39,10 @@ public final class PylonUpgradeInventory extends ItemInventory {
     protected void onContentsChanged(int slot) { pylon.onUpgradesChanged(); }
 
     @Override
-    public void deserializeNBT(HolderLookup.Provider registries, CompoundTag tag) {
+    public void deserializeNBT(CompoundTag tag) {
         CompoundTag bounded = tag.copy();
         bounded.putInt("Size", UpgradeType.values().length);
-        super.deserializeNBT(registries, bounded);
+        super.deserializeNBT(bounded);
         // Unexpected old contents remain recoverable items, but grant no stats.
     }
 

@@ -3,10 +3,10 @@
   "category": "redstone",
   "key": {
     "C": {
-      "item": "minecraft:redstone_block"
+      "item": "minecraft:ender_pearl"
     },
     "M": {
-      "item": "minecraft:diamond"
+      "item": "minecraft:iron_ingot"
     }
   },
   "pattern": [
@@ -15,7 +15,7 @@
     " M "
   ],
   "result": {
-    "count": 1,
-    "id": "quantumflux:buffer_upgrade"
-  }
+    "item": "quantumflux:range_upgrade"
+  },
+  "show_notification": true
 }

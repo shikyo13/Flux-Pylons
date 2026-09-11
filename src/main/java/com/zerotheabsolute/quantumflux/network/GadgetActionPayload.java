@@ -4,8 +4,8 @@ import com.zerotheabsolute.quantumflux.QuantumFlux;
 import com.zerotheabsolute.quantumflux.util.GadgetAction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -17,12 +17,12 @@ public record GadgetActionPayload(
         BlockPos targetPos,
         int intPayload,
         int requestId
-) implements CustomPacketPayload {
+) implements QFPayload {
 
     public static final Type<GadgetActionPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "gadget_action"));
+            new Type<>(new ResourceLocation(QuantumFlux.MODID, "gadget_action"));
 
-    public static final StreamCodec<FriendlyByteBuf, GadgetActionPayload> STREAM_CODEC = StreamCodec.of(
+    public static final PacketCodec<FriendlyByteBuf, GadgetActionPayload> STREAM_CODEC = PacketCodec.of(
             (buf, p) -> {
                 buf.writeBlockPos(p.pylonPos);
                 buf.writeVarInt(p.action.ordinal());
@@ -50,7 +50,7 @@ public record GadgetActionPayload(
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public Type<? extends QFPayload> type() {
         return TYPE;
     }
 }

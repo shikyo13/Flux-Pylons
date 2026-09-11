@@ -9,8 +9,8 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
-public record PylonUpgradeProvider(QuantumPylonBlockEntity pylon) implements ExtendedScreenHandlerFactory<BlockPos> {
-    @Override public BlockPos getScreenOpeningData(ServerPlayer player) { return pylon.getBlockPos(); }
+public record PylonUpgradeProvider(QuantumPylonBlockEntity pylon) implements ExtendedScreenHandlerFactory {
+    @Override public void writeScreenOpeningData(ServerPlayer player, net.minecraft.network.FriendlyByteBuf buffer) { buffer.writeBlockPos(pylon.getBlockPos()); }
     @Override public Component getDisplayName() { return Component.translatable("screen.quantumflux.upgrades.title"); }
     @Override public AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) { return new PylonUpgradeMenu(id, inventory, pylon); }
 }

@@ -3,8 +3,8 @@ package com.zerotheabsolute.quantumflux.network;
 import com.zerotheabsolute.quantumflux.QuantumFlux;
 import com.zerotheabsolute.quantumflux.network.data.QuantumFluxNetworkManager;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import io.netty.handler.codec.DecoderException;
  * Server -> Client: list of all networks the player can access.
  * Sent on login and after any network mutation.
  */
-public record NetworkListSyncS2CPayload(List<NetworkSummary> networks) implements CustomPacketPayload {
+public record NetworkListSyncS2CPayload(List<NetworkSummary> networks) implements QFPayload {
 
     public static final int MAX_SYNCED_NETWORKS = QuantumFluxNetworkManager.MAX_NETWORKS_PER_DIMENSION;
     public static final int MAX_SYNCED_MEMBERS = 64;
@@ -33,13 +33,13 @@ public record NetworkListSyncS2CPayload(List<NetworkSummary> networks) implement
                                  List<MemberSummary> members) {}
 
     public static final Type<NetworkListSyncS2CPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "network_list_sync"));
+            new Type<>(new ResourceLocation(QuantumFlux.MODID, "network_list_sync"));
 
-    public static final StreamCodec<FriendlyByteBuf, NetworkListSyncS2CPayload> STREAM_CODEC =
-            StreamCodec.of(NetworkListSyncS2CPayload::write, NetworkListSyncS2CPayload::read);
+    public static final PacketCodec<FriendlyByteBuf, NetworkListSyncS2CPayload> STREAM_CODEC =
+            PacketCodec.of(NetworkListSyncS2CPayload::write, NetworkListSyncS2CPayload::read);
 
     @Override
-    public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    public Type<? extends QFPayload> type() { return TYPE; }
 
     private static void write(FriendlyByteBuf buf, NetworkListSyncS2CPayload payload) {
         int networkCount = Math.min(payload.networks.size(), MAX_SYNCED_NETWORKS);
@@ -78,12 +78,12 @@ public record NetworkListSyncS2CPayload(List<NetworkSummary> networks) implement
             int numericId = buf.readVarInt();
             String name = buf.readUtf(MAX_NETWORK_NAME_LENGTH);
             int color = buf.readInt() & 0xFFFFFF;
-            int pylonCount = Math.clamp(buf.readVarInt(), 0, 256);
-            int energyPct = Math.clamp(buf.readVarInt(), 0, 100);
-            int accessMode = Math.clamp(buf.readByte(), 0, 2);
+            int pylonCount = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 0, 256);
+            int energyPct = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 0, 100);
+            int accessMode = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readByte(), 0, 2);
             boolean isOwner = buf.readBoolean();
             boolean isMember = buf.readBoolean();
-            int beamStyle = Math.clamp(buf.readByte(), 0, 2);
+            int beamStyle = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readByte(), 0, 2);
             boolean beamsVisible = buf.readBoolean();
             int memberCount = buf.readVarInt();
             if (memberCount < 0 || memberCount > MAX_SYNCED_MEMBERS) {

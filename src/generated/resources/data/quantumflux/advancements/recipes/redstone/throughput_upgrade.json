@@ -1,11 +1,13 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_copper": {
+    "has_core": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:copper_ingot"
+            "items": [
+              "minecraft:redstone"
+            ]
           }
         ]
       },
@@ -13,20 +15,21 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "quantumflux:quantum_gadget"
+        "recipe": "quantumflux:throughput_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_copper"
+      "has_core",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "quantumflux:quantum_gadget"
+      "quantumflux:throughput_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

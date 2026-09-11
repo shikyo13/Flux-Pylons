@@ -136,7 +136,7 @@ final class GadgetScreenRenderer {
 
         int barY = y + 30;
         int pct = telemetry.capacity() > 0
-                ? (int) Math.clamp(telemetry.energy() * 100L / telemetry.capacity(), 0L, 100L) : 0;
+                ? (int) com.zerotheabsolute.quantumflux.util.Numbers.clamp(telemetry.energy() * 100L / telemetry.capacity(), 0L, 100L) : 0;
         PylonReadout.renderMeter(graphics, x, barY + 14, screen.contentWidth(), 6,
                 telemetry.energy(), telemetry.capacity(), 0xFF000000 | network.color());
         graphics.drawCenteredString(font, Component.translatable("screen.quantumflux.overview.energy_bar",

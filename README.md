@@ -37,6 +37,7 @@ The [wiki](https://github.com/shikyo13/Flux-Pylons/tree/main/docs/wiki) covers s
 | 1.21.1 | NeoForge 21.1.206 or later in the 21.1 series | 21 | [main](https://github.com/shikyo13/Flux-Pylons/tree/main) |
 | 1.21.1 | Fabric Loader 0.16.14 or later | 21 | [mc/1.21.1-fabric](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.21.1-fabric) |
 | 1.20.1 | Forge 47.4.10 or later in the 47 series | 17 | [mc/1.20.1-forge](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-forge) |
+| 1.20.1 | Fabric Loader 0.16.14 or later | 17 | [mc/1.20.1-fabric](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-fabric) |
 
 Install the matching file on both the server and clients. An energy source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
 
@@ -46,13 +47,13 @@ Use the file's version and loader tags when downloading. See the [roadmap](ROADM
 
 ## Build
 
-Use JDK 21 and the included Gradle wrapper:
+Use JDK 17 and the included Gradle wrapper:
 
 ```sh
 ./gradlew assemble
 ```
 
-The JAR is written to `build/libs/`. The Forge branch uses JDK 17. [Release 1.2.0](https://github.com/shikyo13/Flux-Pylons/releases/tag/v1.2.0) includes all three builds.
+The JAR is written to `build/libs/`. The 1.20.1 branches use JDK 17; 1.21.1 uses JDK 21. [Release 1.2.0](https://github.com/shikyo13/Flux-Pylons/releases/tag/v1.2.0) contains the available builds.
 
 For the full build and asset verification, install Python 3.13.3, `requirements-assets.txt`, and FFmpeg 8.0.1 with libvorbis. The [build workflow](.github/workflows/build.yml) pins the Linux FFmpeg build used for byte-identical audio:
 

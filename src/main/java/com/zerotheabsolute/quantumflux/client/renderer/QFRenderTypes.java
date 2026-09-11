@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.function.Function;
 
 /** Render types for the pylon's fullbright, softly blended energy surfaces. */
-public final class QFRenderTypes extends RenderStateShard {
+public final class QFRenderTypes extends RenderType {
 
     private static final Function<ResourceLocation, RenderType> DEPTH_TESTED_EMISSIVE = Util.memoize(
             texture -> createSoftEmissive(texture, false));
@@ -18,7 +18,7 @@ public final class QFRenderTypes extends RenderStateShard {
             texture -> createSoftEmissive(texture, true));
 
     private QFRenderTypes() {
-        super("quantumflux_dummy", () -> {}, () -> {});
+        super("quantumflux_dummy", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 256, false, true, () -> {}, () -> {});
     }
 
     private static RenderType createSoftEmissive(ResourceLocation texture, boolean seeThrough) {

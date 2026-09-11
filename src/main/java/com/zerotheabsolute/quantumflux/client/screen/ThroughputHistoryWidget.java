@@ -44,7 +44,7 @@ final class ThroughputHistoryWidget extends AbstractWidget {
             int plotHeight = Math.max(1, height - 20);
             graphics.fill(x + 4, bottom, x + width - 4, bottom + 1, GadgetScreenTheme.BORDER_DIM);
             double maximum = points.stream().mapToDouble(ClientNetworkCache.HistoryPoint::throughput).max().orElse(0);
-            long newest = points.getLast().sampleTick();
+            long newest = points.get(points.size() - 1).sampleTick();
             for (int index = 0; index < points.size(); index++) {
                 var point = points.get(index);
                 int px = plotX(point.sampleTick(), newest);
@@ -57,17 +57,17 @@ final class ThroughputHistoryWidget extends AbstractWidget {
     }
 
     private int plotX(long tick, long newest) {
-        return getX() + 4 + (int) ((width - 10) * Math.clamp(1.0 - (newest - tick) / 1_200.0, 0, 1));
+        return getX() + 4 + (int) ((width - 10) * com.zerotheabsolute.quantumflux.util.Numbers.clamp(1.0 - (newest - tick) / 1_200.0, 0, 1));
     }
 
     private int selectedIndex(int count) {
-        return Math.clamp(count - 1 - offset, 0, count - 1);
+        return com.zerotheabsolute.quantumflux.util.Numbers.clamp(count - 1 - offset, 0, count - 1);
     }
 
     private int nearestPoint(List<ClientNetworkCache.HistoryPoint> points, double mouseX) {
         int chosen = points.size() - 1;
         double distance = Double.MAX_VALUE;
-        long newest = points.getLast().sampleTick();
+        long newest = points.get(points.size() - 1).sampleTick();
         for (int index = 0; index < points.size(); index++) {
             double next = Math.abs(plotX(points.get(index).sampleTick(), newest) - mouseX);
             if (next < distance) { distance = next; chosen = index; }
@@ -77,7 +77,7 @@ final class ThroughputHistoryWidget extends AbstractWidget {
 
     private Component reading(List<ClientNetworkCache.HistoryPoint> points, int index) {
         var point = points.get(index);
-        long secondsAgo = (points.getLast().sampleTick() - point.sampleTick()) / 20;
+        long secondsAgo = (points.get(points.size() - 1).sampleTick() - point.sampleTick()) / 20;
         return Component.translatable("screen.quantumflux.history.reading",
                 secondsAgo, PylonReadout.formatRate(point.throughput()));
     }
@@ -92,7 +92,7 @@ final class ThroughputHistoryWidget extends AbstractWidget {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         int size = ClientNetworkCache.history(networkId).size();
         if (size > 0 && (keyCode == GLFW.GLFW_KEY_LEFT || keyCode == GLFW.GLFW_KEY_RIGHT)) {
-            offset = Math.clamp(offset + (keyCode == GLFW.GLFW_KEY_LEFT ? 1 : -1), 0, size - 1);
+            offset = com.zerotheabsolute.quantumflux.util.Numbers.clamp(offset + (keyCode == GLFW.GLFW_KEY_LEFT ? 1 : -1), 0, size - 1);
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

@@ -95,7 +95,7 @@ public final class PylonReadout {
     public static void renderMeter(GuiGraphics graphics, int x, int y, int width, int height,
                                    long energy, long capacity, int color) {
         graphics.fill(x, y, x + width, y + height, 0xFF303846);
-        double fraction = capacity > 0 ? Math.clamp((double) energy / capacity, 0.0, 1.0) : 0.0;
+        double fraction = capacity > 0 ? com.zerotheabsolute.quantumflux.util.Numbers.clamp((double) energy / capacity, 0.0, 1.0) : 0.0;
         int filled = energy > 0 ? Math.max(1, (int) (width * fraction)) : 0;
         graphics.fill(x, y, x + filled, y + height, color);
         for (int segment = 1; segment < 10; segment++) {

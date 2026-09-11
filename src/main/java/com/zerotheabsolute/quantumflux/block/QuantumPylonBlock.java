@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 public class QuantumPylonBlock extends BaseEntityBlock {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    public static final MapCodec<QuantumPylonBlock> CODEC = simpleCodec(QuantumPylonBlock::new);
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     public static final EnumProperty<PylonHalf> HALF = EnumProperty.create("half", PylonHalf.class);
 
@@ -68,10 +67,6 @@ public class QuantumPylonBlock extends BaseEntityBlock {
             Block.box(11.75, 5.5, 11.75, 13.25, 15, 13.25)
     ).optimize();
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
 
     public QuantumPylonBlock(Properties properties) {
         super(properties);
@@ -135,7 +130,7 @@ public class QuantumPylonBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
         if (!level.isClientSide) {
             PylonHalf half = state.getValue(HALF);
             BlockPos otherPos = half == PylonHalf.BOTTOM ? pos.above() : pos.below();
@@ -162,7 +157,7 @@ public class QuantumPylonBlock extends BaseEntityBlock {
                 level.levelEvent(player, 2001, otherPos, Block.getId(otherState));
             }
         }
-        return super.playerWillDestroy(level, pos, state, player);
+        super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
@@ -172,7 +167,7 @@ public class QuantumPylonBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
                                      LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         PylonHalf half = state.getValue(HALF);
         // If the partner half disappears (commands, pistons, etc.), break self

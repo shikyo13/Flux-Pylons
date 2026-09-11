@@ -1,4 +1,4 @@
 pluginManagement {
     repositories { maven { url = 'https://maven.fabricmc.net/' }; gradlePluginPortal() }
 }
-rootProject.name = 'flux-pylons-fabric-1.21.1'
+rootProject.name = 'flux-pylons-fabric-1.20.1'

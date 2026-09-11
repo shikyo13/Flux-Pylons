@@ -23,10 +23,10 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Setup JDK 21
+      - name: Setup JDK 17
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Setup Python 3.13.3
@@ -67,10 +67,13 @@ jobs:
       - name: Build and verify release JAR
         run: ./gradlew --no-daemon clean build
 
+      - name: Run Fabric GameTests
+        run: ./gradlew --no-daemon runGameTest
+
       - name: Upload release JAR
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: flux-pylons-fabric-1.21.1-${{ github.sha }}
+          name: flux-pylons-fabric-1.20.1-${{ github.sha }}
           path: build/libs/flux-pylons-*.jar
           if-no-files-found: error
           retention-days: 14
@@ -79,7 +82,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: gametest-log-fabric-1.21.1-${{ github.sha }}
+          name: gametest-log-fabric-1.20.1-${{ github.sha }}
           path: build/run/gameTest/logs/latest.log
           if-no-files-found: ignore
           retention-days: 14

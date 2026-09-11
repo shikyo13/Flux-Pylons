@@ -4,21 +4,21 @@ plugins {
 }
 version = mod_version
 group = mod_group_id
-base.archivesName = 'flux-pylons-fabric-1.21.1'
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+base.archivesName = 'flux-pylons-fabric-1.20.1'
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 repositories {
     maven { url = 'https://api.modrinth.com/maven' }
 }
 dependencies {
-    minecraft 'com.mojang:minecraft:1.21.1'
+    minecraft 'com.mojang:minecraft:1.20.1'
     mappings loom.officialMojangMappings()
     modImplementation 'net.fabricmc:fabric-loader:0.19.5'
-    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.116.17+1.21.1'
-    include modApi('teamreborn:energy:4.1.0')
-    modImplementation 'maven.modrinth:forge-config-api-port:N5qzq0XV'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.92.12+1.20.1'
+    include modApi('teamreborn:energy:3.0.0')
+    modImplementation 'maven.modrinth:forge-config-api-port:HvR3IdRE'
     // Loom does not put dependency jar-in-jar libraries on the development classpath.
-    runtimeOnly 'com.electronwill.night-config:core:3.8.0'
-    runtimeOnly 'com.electronwill.night-config:toml:3.8.0'
+    runtimeOnly 'com.electronwill.night-config:core:3.6.5'
+    runtimeOnly 'com.electronwill.night-config:toml:3.6.5'
 }
 sourceSets.main.resources.srcDir 'src/generated/resources'
 // Data generators and GameTests have separate entrypoints from the shipped mod.
@@ -41,7 +41,7 @@ loom {
         server { server(); programArg '--nogui' }
     }
 }
-tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 17 }
 tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }
 processResources {
     inputs.property 'version', project.version
@@ -49,7 +49,7 @@ processResources {
 }
 jar {
     includeEmptyDirs = false
-    exclude '.cache/**', 'data/quantumflux/structure/empty.nbt'
+    exclude '.cache/**', 'data/quantumflux/structures/empty.nbt'
     from('LICENSE') { into 'META-INF'; rename { 'LICENSE_quantumflux.txt' } }
     from('TEMPLATE_LICENSE.txt') { into 'META-INF'; rename { 'LICENSE_NEOFORGED_MDK_TEMPLATE.txt' } }
 }
@@ -149,7 +149,7 @@ var verifyReleaseJar = tasks.register('verifyReleaseJar') {
             }
             def metadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry('fabric.mod.json')))
             if (metadata.version != project.version || metadata.id != 'quantumflux') throw new GradleException('Incorrect Fabric metadata')
-            if (!metadata.jars?.any { it.file.contains('energy-4.1.0') && names.contains(it.file) }) throw new GradleException('Embedded Energy API missing')
+            if (!metadata.jars?.any { it.file.contains('energy-3.0.0') && names.contains(it.file) }) throw new GradleException('Embedded Energy API missing')
         }
     }
 }

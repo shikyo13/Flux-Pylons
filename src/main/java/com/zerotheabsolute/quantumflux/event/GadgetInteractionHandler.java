@@ -32,8 +32,8 @@ public final class GadgetInteractionHandler {
         UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
             ItemStack stack = player.getItemInHand(hand);
             if (player.isSpectator() || !(stack.getItem() instanceof QuantumGadgetItem)
-                    || !Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()))) return InteractionResult.PASS;
-            var linking = stack.get(QFDataComponents.LINKING_DATA.get());
+                    || !Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack))) return InteractionResult.PASS;
+            var linking = QFDataComponents.LINKING_DATA.get(stack);
             if (linking == null || !linking.active() || level.getBlockState(hit.getBlockPos()).getBlock() instanceof QuantumPylonBlock) return InteractionResult.PASS;
             return QuantumGadgetItem.handleLinkInteraction(player, level, hit.getBlockPos(), stack)
                     ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
@@ -48,19 +48,19 @@ public final class GadgetInteractionHandler {
             ItemStack stack = player.getInventory().getItem(slot);
             if (!(stack.getItem() instanceof QuantumGadgetItem)) continue;
 
-            QFDataComponents.LinkingData linking = stack.get(QFDataComponents.LINKING_DATA.get());
+            QFDataComponents.LinkingData linking = QFDataComponents.LINKING_DATA.get(stack);
             if (linking != null && !currentDimension.equals(linking.dimension())) {
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 changed = true;
             }
 
-            String selectedDimension = stack.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
-            boolean hasSelection = stack.get(QFDataComponents.SELECTED_NETWORK.get()) != null;
+            String selectedDimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(stack);
+            boolean hasSelection = QFDataComponents.SELECTED_NETWORK.get(stack) != null;
             if ((clearSelection && hasSelection)
                     || (hasSelection && !currentDimension.equals(selectedDimension))) {
-                stack.remove(QFDataComponents.SELECTED_NETWORK.get());
-                stack.remove(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
-                stack.set(QFDataComponents.GADGET_COLOR.get(), QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
+                QFDataComponents.SELECTED_NETWORK.remove(stack);
+                QFDataComponents.SELECTED_NETWORK_DIMENSION.remove(stack);
+                QFDataComponents.GADGET_COLOR.set(stack, QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
                 changed = true;
             }
         }

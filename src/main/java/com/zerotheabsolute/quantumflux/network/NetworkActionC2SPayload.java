@@ -3,8 +3,8 @@ package com.zerotheabsolute.quantumflux.network;
 import com.zerotheabsolute.quantumflux.QuantumFlux;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.UUID;
@@ -15,7 +15,7 @@ import java.util.UUID;
  */
 public record NetworkActionC2SPayload(Action action, UUID networkId,
                                        String name, int color, BlockPos pylonPos,
-                                       int requestId) implements CustomPacketPayload {
+                                       int requestId) implements QFPayload {
 
     public enum Action {
         CREATE,                 // name + color (networkId ignored)
@@ -36,13 +36,13 @@ public record NetworkActionC2SPayload(Action action, UUID networkId,
     }
 
     public static final Type<NetworkActionC2SPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "network_action"));
+            new Type<>(new ResourceLocation(QuantumFlux.MODID, "network_action"));
 
-    public static final StreamCodec<FriendlyByteBuf, NetworkActionC2SPayload> STREAM_CODEC =
-            StreamCodec.of(NetworkActionC2SPayload::write, NetworkActionC2SPayload::read);
+    public static final PacketCodec<FriendlyByteBuf, NetworkActionC2SPayload> STREAM_CODEC =
+            PacketCodec.of(NetworkActionC2SPayload::write, NetworkActionC2SPayload::read);
 
     @Override
-    public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    public Type<? extends QFPayload> type() { return TYPE; }
 
     // Convenience constructors
     public static NetworkActionC2SPayload create(String name, int color) {

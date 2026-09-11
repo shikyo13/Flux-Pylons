@@ -17,7 +17,7 @@ public final class QuantumUpgradeItem extends Item {
     public UpgradeType type() { return type; }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.level.Level context, List<Component> lines, TooltipFlag flag) {
         lines.add(Component.translatable("tooltip.quantumflux.upgrade." + type.key()));
         lines.add(Component.translatable("tooltip.quantumflux.upgrade_limit", UpgradeType.MAX_LEVEL));
     }

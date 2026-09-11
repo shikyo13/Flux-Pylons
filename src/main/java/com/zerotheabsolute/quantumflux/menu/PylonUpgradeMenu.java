@@ -9,7 +9,7 @@ import com.zerotheabsolute.quantumflux.item.UpgradeType;
 import com.zerotheabsolute.quantumflux.network.QFNetworking;
 import com.zerotheabsolute.quantumflux.network.data.QuantumFluxNetworkManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
@@ -135,7 +135,7 @@ public final class PylonUpgradeMenu extends AbstractContainerMenu {
     }
 
     private static boolean activeGadget(ItemStack stack) {
-        return stack.is(QFItems.QUANTUM_GADGET.get()) && Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+        return stack.is(QFItems.QUANTUM_GADGET.get()) && Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
     }
 
     @Override

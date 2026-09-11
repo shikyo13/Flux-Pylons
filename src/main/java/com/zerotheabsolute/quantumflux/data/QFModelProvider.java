@@ -21,7 +21,7 @@ public final class QFModelProvider extends FabricModelProvider {
         generator.blockStateOutput.accept(MultiVariantGenerator.multiVariant(QFBlocks.QUANTUM_PYLON.get())
                 .with(PropertyDispatch.properties(QuantumPylonBlock.ACTIVE, QuantumPylonBlock.HALF)
                         .generate((active, half) -> Variant.variant().with(VariantProperties.MODEL,
-                                ResourceLocation.fromNamespaceAndPath("quantumflux", "block/quantum_pylon_"
+                                new ResourceLocation("quantumflux", "block/quantum_pylon_"
                                         + half.getSerializedName() + (active ? "_active" : ""))))));
         // The pylon and gadget item geometry lives in src/main/resources.
         generator.skipAutoItemBlock(QFBlocks.QUANTUM_PYLON.get());

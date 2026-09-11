@@ -58,11 +58,7 @@ public class QuantumFluxNetworkManager extends SavedData {
 
     public static QuantumFluxNetworkManager get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new Factory<>(
-                        QuantumFluxNetworkManager::new,
-                        QuantumFluxNetworkManager::load,
-                        null
-                ),
+                QuantumFluxNetworkManager::load, QuantumFluxNetworkManager::new,
                 DATA_NAME
         );
     }
@@ -437,7 +433,7 @@ public class QuantumFluxNetworkManager extends SavedData {
     // ── Serialization ──
 
     @Override
-    public @NotNull CompoundTag save(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
+    public @NotNull CompoundTag save(@NotNull CompoundTag tag) {
         tag.putInt("nextNumericId", nextNumericId.get());
         tag.putInt("overflowMigrationVersion", OVERFLOW_MIGRATION_VERSION);
 
@@ -450,7 +446,7 @@ public class QuantumFluxNetworkManager extends SavedData {
         return tag;
     }
 
-    public static QuantumFluxNetworkManager load(CompoundTag tag, HolderLookup.Provider registries) {
+    public static QuantumFluxNetworkManager load(CompoundTag tag) {
         QuantumFluxNetworkManager manager = new QuantumFluxNetworkManager();
         manager.nextNumericId.set(tag.getInt("nextNumericId"));
         if (manager.nextNumericId.get() < 1) manager.nextNumericId.set(1);

@@ -30,7 +30,7 @@ public final class BeamBudgetAllocator {
 
         int maximumBeams = vertexBudget / verticesPerBeam;
         if (maximumBeams <= 0) return Set.of();
-        double retention = Math.clamp(retainedScoreMultiplier, 0.0, 1.0);
+        double retention = com.zerotheabsolute.quantumflux.util.Numbers.clamp(retainedScoreMultiplier, 0.0, 1.0);
 
         Comparator<Candidate> bestFirst = Comparator
                 .comparingDouble((Candidate candidate) -> score(candidate, retention))

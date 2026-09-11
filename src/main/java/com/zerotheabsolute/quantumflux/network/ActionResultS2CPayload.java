@@ -2,12 +2,12 @@ package com.zerotheabsolute.quantumflux.network;
 
 import com.zerotheabsolute.quantumflux.QuantumFlux;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 
 /** Correlated server acknowledgement for every gadget-screen mutation. */
-public record ActionResultS2CPayload(int requestId, Result result) implements CustomPacketPayload {
+public record ActionResultS2CPayload(int requestId, Result result) implements QFPayload {
 
     public enum Result {
         APPLIED(true, "screen.quantumflux.result.applied"),
@@ -35,8 +35,8 @@ public record ActionResultS2CPayload(int requestId, Result result) implements Cu
     }
 
     public static final Type<ActionResultS2CPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "action_result"));
-    public static final StreamCodec<FriendlyByteBuf, ActionResultS2CPayload> STREAM_CODEC = StreamCodec.of(
+            new ResourceLocation(QuantumFlux.MODID, "action_result"));
+    public static final PacketCodec<FriendlyByteBuf, ActionResultS2CPayload> STREAM_CODEC = PacketCodec.of(
             (buf, payload) -> {
                 buf.writeVarInt(payload.requestId);
                 buf.writeVarInt(payload.result.ordinal());
@@ -51,5 +51,5 @@ public record ActionResultS2CPayload(int requestId, Result result) implements Cu
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    public Type<? extends QFPayload> type() { return TYPE; }
 }

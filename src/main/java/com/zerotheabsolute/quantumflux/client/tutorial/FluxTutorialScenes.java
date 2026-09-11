@@ -15,7 +15,7 @@ import static com.zerotheabsolute.quantumflux.client.tutorial.FluxTutorialScreen
 
 final class FluxTutorialScenes {
     private static final String[] CHAPTERS = {"setup", "linking", "power", "status", "upgrades"};
-    private static final ResourceLocation BACKDROP = ResourceLocation.fromNamespaceAndPath("quantumflux", "textures/gui/tutorial_forest.png");
+    private static final ResourceLocation BACKDROP = new ResourceLocation("quantumflux", "textures/gui/tutorial_forest.png");
     private static final PylonStatus[] STATES = {PylonStatus.UNLINKED, PylonStatus.NO_POWER,
             PylonStatus.TRANSFERRING, PylonStatus.STANDBY, PylonStatus.PAUSED, PylonStatus.NETWORK_BUFFER};
 
@@ -30,7 +30,7 @@ final class FluxTutorialScenes {
     }
 
     static void render(GuiGraphics graphics, int chapter, double time) {
-        // A diagram uses the real item models; the generic E nodes do not imply a vanilla machine accepts E.
+        // A diagram uses the real item models; the generic FE nodes do not imply a vanilla machine accepts FE.
         graphics.pose().pushPose();
         graphics.pose().scale(480f / 3440, 180f / 1290, 1);
         graphics.blit(BACKDROP, 0, 0, 0, 0, 3440, 1290, 3440, 1440);
@@ -66,7 +66,7 @@ final class FluxTutorialScenes {
             graphics.fill(305, 68, 459, 85, 0xFF060B0D);
             graphics.renderOutline(305, 68, 154, 17, step == 1 ? ACCENT : 0xFF4D585B);
             String name = text("example_network").getString();
-            int letters = step == 1 ? Math.clamp((int) ((time - 6) * 4), 0, name.length()) : name.length();
+            int letters = step == 1 ? com.zerotheabsolute.quantumflux.util.Numbers.clamp((int) ((time - 6) * 4), 0, name.length()) : name.length();
             graphics.drawString(Minecraft.getInstance().font, name.substring(0, letters), 310, 73, TEXT, false);
             demoButton(graphics, 305, 112, 154, Component.translatable("screen.quantumflux.action.create"));
             for (int color = 0; color < 8; color++) graphics.fill(306 + color * 19, 93, 320 + color * 19, 104,
@@ -247,6 +247,6 @@ final class FluxTutorialScenes {
         static final ItemStack[] UPGRADES = {new ItemStack(QFItems.RANGE_UPGRADE.get()),
                 new ItemStack(QFItems.CAPACITY_UPGRADE.get()), new ItemStack(QFItems.THROUGHPUT_UPGRADE.get()),
                 new ItemStack(QFItems.BUFFER_UPGRADE.get())};
-        static { GADGET.set(QFDataComponents.GADGET_ACTIVE.get(), true); }
+        static { QFDataComponents.GADGET_ACTIVE.set(GADGET, true); }
     }
 }

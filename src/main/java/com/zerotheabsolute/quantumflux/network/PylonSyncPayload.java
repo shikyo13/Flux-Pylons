@@ -7,8 +7,8 @@ import com.zerotheabsolute.quantumflux.util.ConnectionStatus;
 import com.zerotheabsolute.quantumflux.util.RedstoneMode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import org.jetbrains.annotations.Nullable;
@@ -41,19 +41,19 @@ public record PylonSyncPayload(
         @Nullable UUID networkId,
         RedstoneMode redstoneMode,
         boolean outputEnabled
-) implements CustomPacketPayload {
+) implements QFPayload {
 
     public static final int MAX_SYNCED_CONNECTIONS = 128;
     // 96 Unicode code points can occupy up to 192 UTF-16 code units.
     private static final int MAX_DISPLAY_NAME_LENGTH = 192;
 
     public static final Type<PylonSyncPayload> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "pylon_sync"));
+            new Type<>(new ResourceLocation(QuantumFlux.MODID, "pylon_sync"));
 
     public record ConnectionEntry(BlockPos pos, String displayName, double lastTransferred,
                                   ConnectionStatus status) {}
 
-    public static final StreamCodec<FriendlyByteBuf, PylonSyncPayload> STREAM_CODEC = StreamCodec.of(
+    public static final PacketCodec<FriendlyByteBuf, PylonSyncPayload> STREAM_CODEC = PacketCodec.of(
             PylonSyncPayload::write,
             PylonSyncPayload::read
     );
@@ -116,8 +116,8 @@ public record PylonSyncPayload(
         boolean visible = buf.readBoolean();
         float pulse = finiteClamped(buf.readFloat(), 0.1f, 4.0f, 1.0f);
         PriorityMode priority = readEnum(buf, PriorityMode.values(), PriorityMode.EQUAL);
-        int range = Math.clamp(buf.readVarInt(), 1, 256);
-        int maxConns = Math.clamp(buf.readVarInt(), 1, MAX_SYNCED_CONNECTIONS);
+        int range = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 1, 256);
+        int maxConns = com.zerotheabsolute.quantumflux.util.Numbers.clamp(buf.readVarInt(), 1, MAX_SYNCED_CONNECTIONS);
         int transferLimit = Math.max(0, buf.readVarInt());
         long availableEnergy = Math.max(0, buf.readVarLong());
 
@@ -137,11 +137,11 @@ public record PylonSyncPayload(
     }
 
     private static float finiteClamped(float value, float minimum, float maximum, float fallback) {
-        return Float.isFinite(value) ? Math.clamp(value, minimum, maximum) : fallback;
+        return Float.isFinite(value) ? com.zerotheabsolute.quantumflux.util.Numbers.clamp(value, minimum, maximum) : fallback;
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public Type<? extends QFPayload> type() {
         return TYPE;
     }
 }

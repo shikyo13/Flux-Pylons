@@ -13,15 +13,15 @@ public final class QFSounds {
 
     public static final Supplier<SoundEvent> GADGET_ON = SOUNDS.register("gadget_on",
             () -> SoundEvent.createVariableRangeEvent(
-                    ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "gadget_on")));
+                    new ResourceLocation(QuantumFlux.MODID, "gadget_on")));
 
     public static final Supplier<SoundEvent> GADGET_OFF = SOUNDS.register("gadget_off",
             () -> SoundEvent.createVariableRangeEvent(
-                    ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "gadget_off")));
+                    new ResourceLocation(QuantumFlux.MODID, "gadget_off")));
 
     public static final Supplier<SoundEvent> PYLON_HUM = SOUNDS.register("pylon_hum",
             () -> SoundEvent.createVariableRangeEvent(
-                    ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "pylon_hum")));
+                    new ResourceLocation(QuantumFlux.MODID, "pylon_hum")));
 
     public static void register() {}
     private QFSounds() {}

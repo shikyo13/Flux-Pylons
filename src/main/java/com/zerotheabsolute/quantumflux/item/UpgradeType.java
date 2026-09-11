@@ -9,7 +9,7 @@ public enum UpgradeType {
 
     public int effectiveValue(int base, int level) {
         long value = Math.max(0, base);
-        int count = Math.clamp(level, 0, MAX_LEVEL);
+        int count = com.zerotheabsolute.quantumflux.util.Numbers.clamp(level, 0, MAX_LEVEL);
         return switch (this) {
             case RANGE -> (int) Math.min(256, value + count * 4);
             case CAPACITY -> (int) Math.min(128, value + count * 2);

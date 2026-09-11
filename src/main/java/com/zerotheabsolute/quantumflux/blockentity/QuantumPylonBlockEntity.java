@@ -549,11 +549,11 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
         tag.putInt("Energy", energyStorage.getEnergyStored());
         tag.putInt("MaxEnergy", energyStorage.getMaxEnergyStored());
-        tag.put("Upgrades", upgrades.serializeNBT(registries));
+        tag.put("Upgrades", upgrades.serializeNBT());
         tag.putInt("BeamColor", beamColor);
         tag.putString("BeamStyle", beamStyle.name());
         tag.putFloat("GlowIntensity", glowIntensity);
@@ -575,11 +575,11 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) {
+        super.load(tag);
 
         int storedEnergy = tag.getInt("Energy");
-        upgrades.deserializeNBT(registries, tag.getCompound("Upgrades"));
+        upgrades.deserializeNBT( tag.getCompound("Upgrades"));
         this.energyStorage = createEnergyStorage(getEffectiveBufferSize(), storedEnergy);
 
         this.beamColor = tag.contains("BeamColor")
@@ -595,7 +595,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         this.redstoneMode = safeEnum(RedstoneMode.class, tag.getString("RedstoneMode"), RedstoneMode.IGNORE);
         // Numeric NBT conversion also reads the prototype's integer peak.
         double savedPeak = tag.getDouble("PeakThroughput");
-        this.peakThroughput = Double.isFinite(savedPeak) ? Math.clamp(savedPeak, 0, Integer.MAX_VALUE) : 0;
+        this.peakThroughput = Double.isFinite(savedPeak) ? com.zerotheabsolute.quantumflux.util.Numbers.clamp(savedPeak, 0, Integer.MAX_VALUE) : 0;
         this.rotatingIndex = Math.max(0, tag.getInt("RotatingIndex"));
         // Throughput describes this live sampling window, not saved activity.
         this.totalThroughput = 0;
@@ -619,7 +619,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         // Vanilla chunk sync only needs the tint source. Rich structure and
         // telemetry use bounded custom payloads after the chunk is known client-side.
@@ -657,7 +657,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     public float getGlowIntensity() { return glowIntensity; }
     public void setGlowIntensity(float intensity) {
         if (!Float.isFinite(intensity)) return;
-        float clamped = Math.clamp(intensity, 0.2f, 2.0f);
+        float clamped = com.zerotheabsolute.quantumflux.util.Numbers.clamp(intensity, 0.2f, 2.0f);
         if (Float.compare(this.glowIntensity, clamped) == 0) return;
         this.glowIntensity = clamped;
         setChanged();
@@ -673,7 +673,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     public float getPulseSpeed() { return pulseSpeed; }
     public void setPulseSpeed(float speed) {
         if (!Float.isFinite(speed)) return;
-        float clamped = Math.clamp(speed, 0.1f, 4.0f);
+        float clamped = com.zerotheabsolute.quantumflux.util.Numbers.clamp(speed, 0.1f, 4.0f);
         if (Float.compare(this.pulseSpeed, clamped) == 0) return;
         this.pulseSpeed = clamped;
         setChanged();
@@ -792,7 +792,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     private static float finiteClamped(float value, float minimum, float maximum, float fallback) {
-        return Float.isFinite(value) ? Math.clamp(value, minimum, maximum) : fallback;
+        return Float.isFinite(value) ? com.zerotheabsolute.quantumflux.util.Numbers.clamp(value, minimum, maximum) : fallback;
     }
 
     private static <E extends Enum<E>> E safeEnum(Class<E> clazz, String name, E fallback) {

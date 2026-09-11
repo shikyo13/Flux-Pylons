@@ -64,16 +64,22 @@ public final class QFNetworking {
     private QFNetworking() {}
 
     public static void register() {
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(PylonSyncPayload.TYPE, PylonSyncPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(PylonTelemetryPayload.TYPE, PylonTelemetryPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(NetworkListSyncS2CPayload.TYPE, NetworkListSyncS2CPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(NetworkTelemetryPayload.TYPE, NetworkTelemetryPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(ActionResultS2CPayload.TYPE, ActionResultS2CPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(OpenPylonPayload.TYPE, OpenPylonPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(GadgetActionPayload.TYPE, GadgetActionPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GadgetActionPayload.TYPE, (payload, ctx) -> handleGadgetAction(payload, new PayloadContext(ctx.player(), ctx.server())));
-        net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playC2S().register(NetworkActionC2SPayload.TYPE, NetworkActionC2SPayload.STREAM_CODEC);
-        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(NetworkActionC2SPayload.TYPE, (payload, ctx) -> handleNetworkAction(payload, new PayloadContext(ctx.player(), ctx.server())));
+        QFPackets.register(PylonSyncPayload.TYPE, PylonSyncPayload.STREAM_CODEC);
+        QFPackets.register(PylonTelemetryPayload.TYPE, PylonTelemetryPayload.STREAM_CODEC);
+        QFPackets.register(NetworkListSyncS2CPayload.TYPE, NetworkListSyncS2CPayload.STREAM_CODEC);
+        QFPackets.register(NetworkTelemetryPayload.TYPE, NetworkTelemetryPayload.STREAM_CODEC);
+        QFPackets.register(ActionResultS2CPayload.TYPE, ActionResultS2CPayload.STREAM_CODEC);
+        QFPackets.register(OpenPylonPayload.TYPE, OpenPylonPayload.STREAM_CODEC);
+        QFPackets.register(GadgetActionPayload.TYPE, GadgetActionPayload.STREAM_CODEC);
+        QFPackets.register(NetworkActionC2SPayload.TYPE, NetworkActionC2SPayload.STREAM_CODEC);
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(GadgetActionPayload.TYPE.id(), (server, player, connection, buffer, response) -> {
+            var payload = GadgetActionPayload.STREAM_CODEC.decode(buffer);
+            handleGadgetAction(payload, new PayloadContext(player, server));
+        });
+        net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.registerGlobalReceiver(NetworkActionC2SPayload.TYPE.id(), (server, player, connection, buffer, response) -> {
+            var payload = NetworkActionC2SPayload.STREAM_CODEC.decode(buffer);
+            handleNetworkAction(payload, new PayloadContext(player, server));
+        });
     }
 
     private static void handleGadgetAction(GadgetActionPayload payload, PayloadContext ctx) {
@@ -371,8 +377,8 @@ public final class QFNetworking {
         QFNetwork network = manager.getNetwork(payload.networkId());
         if (network == null) return ActionResultS2CPayload.Result.NOT_FOUND;
         forEachLoadedPylon(level, network, pylon -> pylon.setBeamColor(payload.color()));
-        if (payload.networkId().equals(gadget.get(QFDataComponents.SELECTED_NETWORK.get()))) {
-            gadget.set(QFDataComponents.GADGET_COLOR.get(), payload.color());
+        if (payload.networkId().equals(QFDataComponents.SELECTED_NETWORK.get(gadget))) {
+            QFDataComponents.GADGET_COLOR.set(gadget, payload.color());
             player.inventoryMenu.broadcastChanges();
         }
         broadcastNetworkLists(level, manager);
@@ -570,7 +576,7 @@ public final class QFNetworking {
 
     private static boolean isActiveGadget(ItemStack stack) {
         return stack.getItem() instanceof QuantumGadgetItem
-                && Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+                && Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
     }
 
     private static boolean isValidNetworkId(UUID networkId) {
@@ -590,10 +596,10 @@ public final class QFNetworking {
     }
 
     private static void setGadgetNetwork(ServerPlayer player, ItemStack gadget, QFNetwork network) {
-        gadget.set(QFDataComponents.SELECTED_NETWORK.get(), network.getUuid());
-        gadget.set(QFDataComponents.SELECTED_NETWORK_DIMENSION.get(),
+        QFDataComponents.SELECTED_NETWORK.set(gadget, network.getUuid());
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.set(gadget,
                 player.serverLevel().dimension().location().toString());
-        gadget.set(QFDataComponents.GADGET_COLOR.get(), network.getColor());
+        QFDataComponents.GADGET_COLOR.set(gadget, network.getColor());
         player.inventoryMenu.broadcastChanges();
     }
 
@@ -697,7 +703,7 @@ public final class QFNetworking {
                 }
             }
             int energyPercent = totalCapacity > 0L
-                    ? (int) Math.clamp(totalEnergy * 100L / totalCapacity, 0L, 100L)
+                    ? (int) com.zerotheabsolute.quantumflux.util.Numbers.clamp(totalEnergy * 100L / totalCapacity, 0L, 100L)
                     : 0;
 
             boolean owner = network.isOwner(player.getUUID());
@@ -774,8 +780,8 @@ public final class QFNetworking {
                                                               Map<UUID, NetworkTelemetryPayload> snapshots) {
         ItemStack gadget = getActiveHeldGadget(player);
         if (gadget.isEmpty()) return null;
-        UUID selected = gadget.get(QFDataComponents.SELECTED_NETWORK.get());
-        String dimension = gadget.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
+        UUID selected = QFDataComponents.SELECTED_NETWORK.get(gadget);
+        String dimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(gadget);
         if (selected == null || !player.level().dimension().location().toString().equals(dimension)) return null;
         QFNetwork network = manager.getNetwork(selected);
         if (network == null || !network.canAccess(player.getUUID())) return null;
@@ -800,22 +806,22 @@ public final class QFNetworking {
                                                     QuantumFluxNetworkManager manager,
                                                     String currentDimension) {
         if (!(stack.getItem() instanceof QuantumGadgetItem)) return false;
-        UUID selected = stack.get(QFDataComponents.SELECTED_NETWORK.get());
+        UUID selected = QFDataComponents.SELECTED_NETWORK.get(stack);
         if (selected == null) return false;
-        String selectedDimension = stack.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
+        String selectedDimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(stack);
         QFNetwork network = manager.getNetwork(selected);
         if (currentDimension.equals(selectedDimension)
                 && network != null && network.canAccess(player.getUUID())) {
-            Integer gadgetColor = stack.get(QFDataComponents.GADGET_COLOR.get());
+            Integer gadgetColor = QFDataComponents.GADGET_COLOR.get(stack);
             if (gadgetColor == null || gadgetColor.intValue() != network.getColor()) {
-                stack.set(QFDataComponents.GADGET_COLOR.get(), network.getColor());
+                QFDataComponents.GADGET_COLOR.set(stack, network.getColor());
                 return true;
             }
             return false;
         }
-        stack.remove(QFDataComponents.SELECTED_NETWORK.get());
-        stack.remove(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
-        stack.set(QFDataComponents.GADGET_COLOR.get(), QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
+        QFDataComponents.SELECTED_NETWORK.remove(stack);
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.remove(stack);
+        QFDataComponents.GADGET_COLOR.set(stack, QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
         return true;
     }
 

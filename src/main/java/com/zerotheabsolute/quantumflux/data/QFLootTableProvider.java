@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 
 public final class QFLootTableProvider extends FabricBlockLootTableProvider {
     public QFLootTableProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+        super(output);
     }
     @Override public void generate() {
         // Only the bottom half drops the pylon item.

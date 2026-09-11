@@ -44,7 +44,7 @@ public class QuantumGadgetItem extends Item {
         ItemStack stack = ctx.getItemInHand();
         if (player == null) return InteractionResult.PASS;
 
-        boolean isActive = Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+        boolean isActive = Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
 
         // ── Sneak + right-click → toggle or pylon actions ──
         if (player.isShiftKeyDown()) {
@@ -61,7 +61,7 @@ public class QuantumGadgetItem extends Item {
             }
 
             // In linking mode, shift+click on non-pylon is an unlink attempt - don't toggle
-            QFDataComponents.LinkingData linkData = stack.get(QFDataComponents.LINKING_DATA.get());
+            QFDataComponents.LinkingData linkData = QFDataComponents.LINKING_DATA.get(stack);
             if (linkData != null && linkData.active()) {
                 if (handleLinkInteraction(player, level, clickedPos, stack)) {
                     return InteractionResult.sidedSuccess(level.isClientSide);
@@ -102,7 +102,7 @@ public class QuantumGadgetItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        boolean isActive = Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+        boolean isActive = Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
 
         // ── Sneak + right-click → toggle on/off ──
         if (player.isShiftKeyDown()) {
@@ -115,10 +115,10 @@ public class QuantumGadgetItem extends Item {
         if (!isActive) return InteractionResultHolder.pass(stack);
 
         // ── Linking mode: RC air → cancel ──
-        QFDataComponents.LinkingData linkData = stack.get(QFDataComponents.LINKING_DATA.get());
+        QFDataComponents.LinkingData linkData = QFDataComponents.LINKING_DATA.get(stack);
         if (linkData != null && linkData.active()) {
             if (!level.isClientSide) {
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 player.displayClientMessage(
                         Component.translatable("message.quantumflux.linking.cancelled")
                                 .withStyle(ChatFormatting.GRAY), true);
@@ -141,8 +141,8 @@ public class QuantumGadgetItem extends Item {
 
     private InteractionResult handlePylonAssign(Level level, Player player, ItemStack stack, BlockPos pylonPos) {
         if (!level.isClientSide) {
-            UUID selectedNetwork = stack.get(QFDataComponents.SELECTED_NETWORK.get());
-            String selectedDimension = stack.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
+            UUID selectedNetwork = QFDataComponents.SELECTED_NETWORK.get(stack);
+            String selectedDimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(stack);
 
             if (selectedNetwork == null || !dimensionId(level).equals(selectedDimension)) {
                 player.displayClientMessage(
@@ -224,7 +224,7 @@ public class QuantumGadgetItem extends Item {
             }
 
             // Enter linking mode
-            stack.set(QFDataComponents.LINKING_DATA.get(),
+            QFDataComponents.LINKING_DATA.set(stack,
                     new QFDataComponents.LinkingData(dimensionId(level), pylonPos, true));
             player.displayClientMessage(
                     Component.translatable("message.quantumflux.linking.started")
@@ -240,12 +240,12 @@ public class QuantumGadgetItem extends Item {
     // ══════════════════════════════════════════
 
     private InteractionResult doToggle(Level level, Player player, ItemStack stack) {
-        Boolean wasActive = stack.get(QFDataComponents.GADGET_ACTIVE.get());
+        Boolean wasActive = QFDataComponents.GADGET_ACTIVE.get(stack);
         boolean newActive = !Boolean.TRUE.equals(wasActive);
         if (!level.isClientSide) {
-            stack.set(QFDataComponents.GADGET_ACTIVE.get(), newActive);
+            QFDataComponents.GADGET_ACTIVE.set(stack, newActive);
             if (!newActive) {
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
             }
             level.playSound(null, player.blockPosition(),
                     newActive ? com.zerotheabsolute.quantumflux.init.QFSounds.GADGET_ON.get()
@@ -260,7 +260,7 @@ public class QuantumGadgetItem extends Item {
     // ══════════════════════════════════════════
 
     public Component getHighlightTip(ItemStack stack, Component displayName) {
-        boolean active = Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+        boolean active = Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
         return Component.empty()
                 .append(displayName)
                 .append(Component.translatable(active
@@ -276,8 +276,8 @@ public class QuantumGadgetItem extends Item {
     // ══════════════════════════════════════════
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> tooltip, TooltipFlag flag) {
-        boolean active = Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+    public void appendHoverText(ItemStack stack, net.minecraft.world.level.Level ctx, List<Component> tooltip, TooltipFlag flag) {
+        boolean active = Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
         tooltip.add(Component.translatable(active
                         ? "tooltip.quantumflux.status.on"
                         : "tooltip.quantumflux.status.off")
@@ -285,7 +285,7 @@ public class QuantumGadgetItem extends Item {
         tooltip.add(Component.translatable("tooltip.quantumflux.toggle")
                 .withStyle(ChatFormatting.YELLOW));
 
-        QFDataComponents.LinkingData linkData = stack.get(QFDataComponents.LINKING_DATA.get());
+        QFDataComponents.LinkingData linkData = QFDataComponents.LINKING_DATA.get(stack);
 
         if (linkData != null && linkData.active()) {
             tooltip.add(Component.translatable("tooltip.quantumflux.linking_position",
@@ -315,12 +315,12 @@ public class QuantumGadgetItem extends Item {
      * Returns true if the interaction was handled.
      */
     public static boolean handleLinkInteraction(Player player, Level level, BlockPos clickedPos, ItemStack stack) {
-        QFDataComponents.LinkingData linkData = stack.get(QFDataComponents.LINKING_DATA.get());
+        QFDataComponents.LinkingData linkData = QFDataComponents.LINKING_DATA.get(stack);
         if (linkData == null || !linkData.active()) return false;
 
         if (!dimensionId(level).equals(linkData.dimension())) {
             if (!level.isClientSide) {
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 player.displayClientMessage(
                         Component.translatable("message.quantumflux.linking.dimension_cancelled")
                                 .withStyle(ChatFormatting.RED), true);
@@ -337,7 +337,7 @@ public class QuantumGadgetItem extends Item {
                     || !level.hasChunkAt(pylonPos)
                     || !level.hasChunkAt(clickedPos)
                     || !canReach(player, clickedPos)) {
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 return true;
             }
 
@@ -347,7 +347,7 @@ public class QuantumGadgetItem extends Item {
                 player.displayClientMessage(
                         Component.translatable("message.quantumflux.linking.pylon_missing")
                                 .withStyle(ChatFormatting.RED), true);
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 return true;
             }
 
@@ -356,7 +356,7 @@ public class QuantumGadgetItem extends Item {
                 player.displayClientMessage(
                         Component.translatable("message.quantumflux.pylon.no_permission")
                                 .withStyle(ChatFormatting.RED), true);
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 return true;
             }
 

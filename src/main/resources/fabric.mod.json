@@ -9,7 +9,7 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/flux-pylons",
-    "sources": "https://github.com/shikyo13/Flux-Pylons/tree/mc/1.21.1-fabric",
+    "sources": "https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-fabric",
     "issues": "https://github.com/shikyo13/Flux-Pylons/issues"
   },
   "license": "LicenseRef-Flux-Pylons-1.1",
@@ -27,11 +27,11 @@
   },
   "depends": {
     "fabricloader": ">=0.16.14",
-    "minecraft": "1.21.1",
-    "java": ">=21",
-    "fabric-api": ">=0.116.0",
-    "team_reborn_energy": ">=4.1.0 <4.2",
-    "forgeconfigapiport": ">=21.1.0 <21.2"
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "fabric-api": ">=0.92.0",
+    "team_reborn_energy": ">=3.0.0 <4",
+    "forgeconfigapiport": ">=8.0.0 <9"
   },
   "custom": {
     "modrinth": {

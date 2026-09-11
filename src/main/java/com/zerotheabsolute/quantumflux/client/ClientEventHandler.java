@@ -44,7 +44,6 @@ public final class ClientEventHandler implements net.fabricmc.api.ClientModIniti
         net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents.AFTER_SETUP.register(context -> PylonBlockEntityRenderer.setFrameFrustum(context.frustum()));
         net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback.EVENT.register((graphics, ticks) -> GameBusEvents.onRenderOverlay(graphics));
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> GameBusEvents.onLevelUnload());
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents.AFTER_CLIENT_WORLD_CHANGE.register((client, world) -> GameBusEvents.onLevelUnload());
     }
 
 
@@ -68,10 +67,9 @@ public final class ClientEventHandler implements net.fabricmc.api.ClientModIniti
 
                 net.minecraft.client.renderer.item.ItemProperties.register(
                         QFItems.QUANTUM_GADGET.get(),
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "active"),
+                        new net.minecraft.resources.ResourceLocation(QuantumFlux.MODID, "active"),
                         (stack, level, entity, seed) ->
-                                Boolean.TRUE.equals(stack.get(
-                                        com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get()))
+                                Boolean.TRUE.equals(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get(stack))
                                         ? 1.0f : 0.0f);
         }
 
@@ -96,14 +94,12 @@ public final class ClientEventHandler implements net.fabricmc.api.ClientModIniti
 
         public static void registerItemColors() {
             net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) -> {
-                boolean active = Boolean.TRUE.equals(stack.get(
-                        com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get()));
+                boolean active = Boolean.TRUE.equals(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get(stack));
                 if (tintIndex == 1) return active ? 0xFF65E375 : 0xFF253E2D;
                 if (tintIndex == 2) return active ? 0xFF512626 : 0xFFE25543;
                 if (tintIndex != 0) return -1;
                 if (!active) return 0xFF48565B;
-                Integer color = stack.get(
-                        com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_COLOR.get());
+                Integer color = com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_COLOR.get(stack);
                 // Minecraft 1.21 item colors include alpha; a plain RGB value is invisible.
                 return 0xFF000000 | (color == null ? QFConfig.DEFAULT_BEAM_COLOR.get() : color) & 0xFFFFFF;
             }, QFItems.QUANTUM_GADGET.get());
@@ -341,7 +337,7 @@ public final class ClientEventHandler implements net.fabricmc.api.ClientModIniti
             }
 
             // Skip overlay when gadget is off
-            if (!Boolean.TRUE.equals(held.get(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get()))) return;
+            if (!Boolean.TRUE.equals(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get(held))) return;
 
             if (!QFConfig.SHOW_GADGET_OVERLAY.get()) return;
 
@@ -375,7 +371,7 @@ public final class ClientEventHandler implements net.fabricmc.api.ClientModIniti
                 }
             }
 
-            var linkData = held.get(com.zerotheabsolute.quantumflux.init.QFDataComponents.LINKING_DATA.get());
+            var linkData = com.zerotheabsolute.quantumflux.init.QFDataComponents.LINKING_DATA.get(held);
             if (linkData != null && linkData.active()) {
                 Component linkMessage = Component.translatable("overlay.quantumflux.linking",
                         linkData.pylonPos().getX(), linkData.pylonPos().getY(), linkData.pylonPos().getZ());

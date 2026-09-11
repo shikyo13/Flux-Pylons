@@ -1,11 +1,13 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_core": {
+    "has_ender_pearl": {
       "conditions": {
         "items": [
           {
-            "items": "minecraft:redstone"
+            "items": [
+              "minecraft:ender_pearl"
+            ]
           }
         ]
       },
@@ -13,20 +15,21 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "quantumflux:throughput_upgrade"
+        "recipe": "quantumflux:quantum_pylon"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_core"
+      "has_ender_pearl",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "quantumflux:throughput_upgrade"
+      "quantumflux:quantum_pylon"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

@@ -125,7 +125,7 @@ public final class BeamRenderFrameBudget {
         double projection = ((point.x - startX) * segmentX
                 + (point.y - startY) * segmentY
                 + (point.z - startZ) * segmentZ) / lengthSquared;
-        double clamped = Math.clamp(projection, 0.0, 1.0);
+        double clamped = com.zerotheabsolute.quantumflux.util.Numbers.clamp(projection, 0.0, 1.0);
         return point.distanceToSqr(
                 startX + segmentX * clamped,
                 startY + segmentY * clamped,

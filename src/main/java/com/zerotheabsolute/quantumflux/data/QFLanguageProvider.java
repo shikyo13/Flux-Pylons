@@ -11,11 +11,11 @@ import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 public class QFLanguageProvider extends FabricLanguageProvider {
 
     public QFLanguageProvider(FabricDataOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
-        super(output, "en_us", lookup);
+        super(output, "en_us");
     }
 
     @Override
-    public void generateTranslations(HolderLookup.Provider lookup, TranslationBuilder builder) {
+    public void generateTranslations(TranslationBuilder builder) {
         builder.add(QFBlocks.QUANTUM_PYLON.get(), "Flux Pylon");
         builder.add(QFItems.QUANTUM_GADGET.get(), "Flux Gadget");
         builder.add(QFItems.RANGE_UPGRADE.get(), "Range Upgrade");

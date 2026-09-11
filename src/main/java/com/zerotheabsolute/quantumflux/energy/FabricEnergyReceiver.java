@@ -15,6 +15,6 @@ public record FabricEnergyReceiver(EnergyStorage storage) implements EnergyRecei
         }
     }
     @Override public boolean canReceive() { return storage.supportsInsertion(); }
-    @Override public int getEnergyStored() { return (int) Math.clamp(storage.getAmount(), 0L, Integer.MAX_VALUE); }
-    @Override public int getMaxEnergyStored() { return (int) Math.clamp(storage.getCapacity(), 0L, Integer.MAX_VALUE); }
+    @Override public int getEnergyStored() { return (int) com.zerotheabsolute.quantumflux.util.Numbers.clamp(storage.getAmount(), 0L, Integer.MAX_VALUE); }
+    @Override public int getMaxEnergyStored() { return (int) com.zerotheabsolute.quantumflux.util.Numbers.clamp(storage.getCapacity(), 0L, Integer.MAX_VALUE); }
 }

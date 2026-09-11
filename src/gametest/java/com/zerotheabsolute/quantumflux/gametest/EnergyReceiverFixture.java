@@ -31,7 +31,7 @@ public record EnergyReceiverFixture(BlockPos getBlockPos, Storage getEnergyStora
         public boolean externalInputEnabled = true;
         public boolean acceptingEnergy = true;
         private Storage(int capacity) { super(capacity, capacity, 0); }
-        public void setEnergy(int energy) { amount = Math.clamp(energy, 0, capacity); }
+        public void setEnergy(int energy) { amount = com.zerotheabsolute.quantumflux.util.Numbers.clamp(energy, 0, capacity); }
         public int getEnergyStored() { return (int) amount; }
         public int getMaxEnergyStored() { return (int) capacity; }
         public int receiveEnergy(int amount, boolean simulate) { return new FabricEnergyReceiver(this).receiveEnergy(amount, simulate); }

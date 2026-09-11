@@ -21,7 +21,7 @@ public class ItemInventory implements Container {
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
         if (stack.isEmpty() || !isItemValid(slot, stack)) return stack;
         ItemStack stored = stacks.get(slot);
-        if (!stored.isEmpty() && !ItemStack.isSameItemSameComponents(stored, stack)) return stack;
+        if (!stored.isEmpty() && !ItemStack.isSameItemSameTags(stored, stack)) return stack;
         int accepted = Math.min(stack.getCount(), Math.max(0, Math.min(getSlotLimit(slot), stack.getMaxStackSize()) - stored.getCount()));
         if (accepted == 0) return stack;
         if (!simulate) {
@@ -41,19 +41,19 @@ public class ItemInventory implements Container {
         }
         return result;
     }
-    public CompoundTag serializeNBT(HolderLookup.Provider registries) {
+    public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag(); ListTag items = new ListTag();
         for (int slot = 0; slot < stacks.size(); slot++) if (!stacks.get(slot).isEmpty()) {
-            CompoundTag item = (CompoundTag) stacks.get(slot).save(registries);
+            CompoundTag item = stacks.get(slot).save(new CompoundTag());
             item.putInt("Slot", slot); items.add(item);
         }
         tag.putInt("Size", stacks.size()); tag.put("Items", items); return tag;
     }
-    public void deserializeNBT(HolderLookup.Provider registries, CompoundTag tag) {
+    public void deserializeNBT(CompoundTag tag) {
         stacks.clear(); ListTag items = tag.getList("Items", 10);
         for (int i = 0; i < items.size(); i++) {
             CompoundTag item = items.getCompound(i); int slot = item.getInt("Slot");
-            if (slot >= 0 && slot < stacks.size()) stacks.set(slot, ItemStack.parseOptional(registries, item));
+            if (slot >= 0 && slot < stacks.size()) stacks.set(slot, ItemStack.of(item));
         }
     }
     @Override public int getContainerSize() { return getSlots(); }

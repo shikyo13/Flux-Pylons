@@ -33,13 +33,13 @@ import java.util.Set;
 public final class PylonBlockEntityRenderer implements BlockEntityRenderer<QuantumPylonBlockEntity> {
 
     private static final ResourceLocation BEAM_CORE_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "textures/misc/beam_core.png");
+            new ResourceLocation(QuantumFlux.MODID, "textures/misc/beam_core.png");
     private static final ResourceLocation BEAM_GLOW_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "textures/misc/beam_glow.png");
+            new ResourceLocation(QuantumFlux.MODID, "textures/misc/beam_glow.png");
     private static final ResourceLocation ENERGY_ORB_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "textures/misc/energy_orb.png");
+            new ResourceLocation(QuantumFlux.MODID, "textures/misc/energy_orb.png");
     private static final ResourceLocation ENERGY_RING_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "textures/misc/energy_ring.png");
+            new ResourceLocation(QuantumFlux.MODID, "textures/misc/energy_ring.png");
 
     private static final int FULLBRIGHT = 0xF000F0;
     private static final float CORE_X = 0.5f;
@@ -224,18 +224,18 @@ public final class PylonBlockEntityRenderer implements BlockEntityRenderer<Quant
 
         Vector3f normal = direction.cross(perpendicularStart, new Vector3f()).normalize();
         Matrix4f matrix = poseStack.last().pose();
-        consumer.addVertex(matrix, start.x() - perpendicularStart.x(), start.y() - perpendicularStart.y(), start.z() - perpendicularStart.z())
-                .setColor(red, green, blue, alpha).setUv(0.0f, uvOffset).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, end.x() - perpendicularEnd.x(), end.y() - perpendicularEnd.y(), end.z() - perpendicularEnd.z())
-                .setColor(red, green, blue, alpha).setUv(0.0f, uvOffset + length).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, end.x() + perpendicularEnd.x(), end.y() + perpendicularEnd.y(), end.z() + perpendicularEnd.z())
-                .setColor(red, green, blue, alpha).setUv(1.0f, uvOffset + length).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, start.x() + perpendicularStart.x(), start.y() + perpendicularStart.y(), start.z() + perpendicularStart.z())
-                .setColor(red, green, blue, alpha).setUv(1.0f, uvOffset).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
+        consumer.vertex(matrix, start.x() - perpendicularStart.x(), start.y() - perpendicularStart.y(), start.z() - perpendicularStart.z())
+                .color(red, green, blue, alpha).uv(0.0f, uvOffset).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, end.x() - perpendicularEnd.x(), end.y() - perpendicularEnd.y(), end.z() - perpendicularEnd.z())
+                .color(red, green, blue, alpha).uv(0.0f, uvOffset + length).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, end.x() + perpendicularEnd.x(), end.y() + perpendicularEnd.y(), end.z() + perpendicularEnd.z())
+                .color(red, green, blue, alpha).uv(1.0f, uvOffset + length).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, start.x() + perpendicularStart.x(), start.y() + perpendicularStart.y(), start.z() + perpendicularStart.z())
+                .color(red, green, blue, alpha).uv(1.0f, uvOffset).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
     }
 
     private void emitQuad(Matrix4f matrix, VertexConsumer consumer,
@@ -244,18 +244,18 @@ public final class PylonBlockEntityRenderer implements BlockEntityRenderer<Quant
                           float uvOffset, float uvLength) {
         Vector3f direction = new Vector3f(end).sub(start).normalize();
         Vector3f normal = direction.cross(perpendicular, new Vector3f()).normalize();
-        consumer.addVertex(matrix, start.x() - perpendicular.x(), start.y() - perpendicular.y(), start.z() - perpendicular.z())
-                .setColor(red, green, blue, alpha).setUv(0.0f, uvOffset).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, end.x() - perpendicular.x(), end.y() - perpendicular.y(), end.z() - perpendicular.z())
-                .setColor(red, green, blue, alpha).setUv(0.0f, uvOffset + uvLength).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, end.x() + perpendicular.x(), end.y() + perpendicular.y(), end.z() + perpendicular.z())
-                .setColor(red, green, blue, alpha).setUv(1.0f, uvOffset + uvLength).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, start.x() + perpendicular.x(), start.y() + perpendicular.y(), start.z() + perpendicular.z())
-                .setColor(red, green, blue, alpha).setUv(1.0f, uvOffset).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
+        consumer.vertex(matrix, start.x() - perpendicular.x(), start.y() - perpendicular.y(), start.z() - perpendicular.z())
+                .color(red, green, blue, alpha).uv(0.0f, uvOffset).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, end.x() - perpendicular.x(), end.y() - perpendicular.y(), end.z() - perpendicular.z())
+                .color(red, green, blue, alpha).uv(0.0f, uvOffset + uvLength).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, end.x() + perpendicular.x(), end.y() + perpendicular.y(), end.z() + perpendicular.z())
+                .color(red, green, blue, alpha).uv(1.0f, uvOffset + uvLength).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, start.x() + perpendicular.x(), start.y() + perpendicular.y(), start.z() + perpendicular.z())
+                .color(red, green, blue, alpha).uv(1.0f, uvOffset).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
     }
 
     private void renderPylonCore(PoseStack poseStack, MultiBufferSource bufferSource,
@@ -305,18 +305,18 @@ public final class PylonBlockEntityRenderer implements BlockEntityRenderer<Quant
     private void emitBillboardQuad(Matrix4f matrix, VertexConsumer consumer,
                                    Vector3f right, Vector3f up, Vector3f normal,
                                    float red, float green, float blue, float alpha) {
-        consumer.addVertex(matrix, CORE_X - right.x() - up.x(), CORE_Y - right.y() - up.y(), CORE_Z - right.z() - up.z())
-                .setColor(red, green, blue, alpha).setUv(0.0f, 1.0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, CORE_X + right.x() - up.x(), CORE_Y + right.y() - up.y(), CORE_Z + right.z() - up.z())
-                .setColor(red, green, blue, alpha).setUv(1.0f, 1.0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, CORE_X + right.x() + up.x(), CORE_Y + right.y() + up.y(), CORE_Z + right.z() + up.z())
-                .setColor(red, green, blue, alpha).setUv(1.0f, 0.0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
-        consumer.addVertex(matrix, CORE_X - right.x() + up.x(), CORE_Y - right.y() + up.y(), CORE_Z - right.z() + up.z())
-                .setColor(red, green, blue, alpha).setUv(0.0f, 0.0f).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
+        consumer.vertex(matrix, CORE_X - right.x() - up.x(), CORE_Y - right.y() - up.y(), CORE_Z - right.z() - up.z())
+                .color(red, green, blue, alpha).uv(0.0f, 1.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, CORE_X + right.x() - up.x(), CORE_Y + right.y() - up.y(), CORE_Z + right.z() - up.z())
+                .color(red, green, blue, alpha).uv(1.0f, 1.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, CORE_X + right.x() + up.x(), CORE_Y + right.y() + up.y(), CORE_Z + right.z() + up.z())
+                .color(red, green, blue, alpha).uv(1.0f, 0.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
+        consumer.vertex(matrix, CORE_X - right.x() + up.x(), CORE_Y - right.y() + up.y(), CORE_Z - right.z() + up.z())
+                .color(red, green, blue, alpha).uv(0.0f, 0.0f).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
     }
 
     private void renderEnergyRings(PoseStack poseStack, MultiBufferSource bufferSource,
@@ -353,9 +353,9 @@ public final class PylonBlockEntityRenderer implements BlockEntityRenderer<Quant
     private void emitRingVertex(Matrix4f matrix, VertexConsumer consumer, Vector3f corner,
                                 float red, float green, float blue, float alpha,
                                 float u, float v, Vector3f normal) {
-        consumer.addVertex(matrix, CORE_X + corner.x(), CORE_Y + corner.y(), CORE_Z + corner.z())
-                .setColor(red, green, blue, alpha).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(FULLBRIGHT)
-                .setNormal(normal.x(), normal.y(), normal.z());
+        consumer.vertex(matrix, CORE_X + corner.x(), CORE_Y + corner.y(), CORE_Z + corner.z())
+                .color(red, green, blue, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(FULLBRIGHT)
+                .normal(normal.x(), normal.y(), normal.z()).endVertex();
     }
 
     private static Vector3f targetFaceEndpoint(BlockPos source, BlockPos target, Vector3f start) {

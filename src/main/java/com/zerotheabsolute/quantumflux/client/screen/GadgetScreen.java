@@ -29,7 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import com.zerotheabsolute.quantumflux.client.ClientNetworking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -517,7 +517,7 @@ public final class GadgetScreen extends Screen {
         int afterColors = addColorButtons(colorY, network.color(), choice -> recolor(network, choice), false);
         if (!network.isOwner()) {
             for (var child : children()) {
-                if (child instanceof Button button && button.getY() >= colorY && button.getBottom() <= afterColors) {
+                if (child instanceof Button button && button.getY() >= colorY && (button.getY() + button.getHeight()) <= afterColors) {
                     button.active = false;
                     button.setTooltip(Tooltip.create(ownerOnly()));
                 }
@@ -702,19 +702,18 @@ public final class GadgetScreen extends Screen {
     }
 
     @Override
-    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        // Screen.render calls this before its widgets. Drawing the panel here avoids
-        // a second vanilla blur pass over the controller's labels and telemetry.
-        super.renderBackground(graphics, mouseX, mouseY, partialTick);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        super.renderBackground(graphics);
         renderMouseX = mouseX;
         renderMouseY = mouseY;
         GadgetScreenRenderer.render(this, graphics);
+        super.render(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollY) {
         if (!insideContent(mouseX, mouseY) || scrollY == 0) {
-            return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+            return super.mouseScrolled(mouseX, mouseY, scrollY);
         }
         int delta = scrollY > 0 ? -1 : 1;
         if (selectedTab == Tab.NETWORKS && networkForm == NetworkForm.NONE) {
@@ -733,7 +732,7 @@ public final class GadgetScreen extends Screen {
             rebuildWidgets(false);
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, scrollY);
     }
 
     @Override
@@ -1039,14 +1038,14 @@ public final class GadgetScreen extends Screen {
         int requestId = allocateRequestId();
         pendingRequests.put(requestId, payload.action());
         trimPendingRequests();
-        ClientPlayNetworking.send(payload.withRequestId(requestId));
+        ClientNetworking.sendToServer(payload.withRequestId(requestId));
     }
 
     private void sendGadgetAction(GadgetActionPayload payload) {
         int requestId = allocateRequestId();
         pendingRequests.put(requestId, NetworkActionC2SPayload.Action.INVALID);
         trimPendingRequests();
-        ClientPlayNetworking.send(payload.withRequestId(requestId));
+        ClientNetworking.sendToServer(payload.withRequestId(requestId));
     }
 
     private int allocateRequestId() {
@@ -1121,10 +1120,10 @@ public final class GadgetScreen extends Screen {
         if (gadget.isEmpty()) return null;
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.level == null) return null;
-        String selectedDimension = gadget.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
+        String selectedDimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(gadget);
         String currentDimension = minecraft.level.dimension().location().toString();
         if (selectedDimension == null || !selectedDimension.equals(currentDimension)) return null;
-        return gadget.get(QFDataComponents.SELECTED_NETWORK.get());
+        return QFDataComponents.SELECTED_NETWORK.get(gadget);
     }
 
     private ItemStack heldGadget() {
@@ -1154,7 +1153,7 @@ public final class GadgetScreen extends Screen {
     Component linkingStatus() {
         ItemStack gadget = heldGadget();
         if (gadget.isEmpty()) return null;
-        QFDataComponents.LinkingData linking = gadget.get(QFDataComponents.LINKING_DATA.get());
+        QFDataComponents.LinkingData linking = QFDataComponents.LINKING_DATA.get(gadget);
         return linking != null && linking.active()
                 ? Component.translatable("screen.quantumflux.status.linking") : null;
     }

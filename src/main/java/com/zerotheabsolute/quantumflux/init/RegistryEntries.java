@@ -9,7 +9,7 @@ final class RegistryEntries<T> {
     private final Registry<T> registry;
     RegistryEntries(Registry<T> registry) { this.registry = registry; }
     <V extends T> Supplier<V> register(String name, Supplier<V> factory) {
-        V value = Registry.register(registry, ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, name), factory.get());
+        V value = Registry.register(registry, new ResourceLocation(QuantumFlux.MODID, name), factory.get());
         return () -> value;
     }
 }
