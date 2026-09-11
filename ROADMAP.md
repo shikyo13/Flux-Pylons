@@ -3,7 +3,7 @@
 ## Released in 1.2.0
 
 - Animated guide and gadget layout improvements.
-- Minecraft 1.20.1 support on Forge, alongside Minecraft 1.21.1 on NeoForge.
+- Minecraft 1.20.1 support on Forge, alongside Minecraft 1.21.1 on NeoForge and Fabric.
 
 ## Next updates
 
@@ -12,7 +12,7 @@
 ## Version and loader ports
 
 1. **Minecraft 1.20.1 — Forge.** Available in [1.2.0](https://github.com/shikyo13/Flux-Pylons/releases/tag/v1.2.0); [source](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-forge).
-2. **Minecraft 1.21.1 — Fabric.** Bring the same power distribution, gadget and guide to Fabric's energy ecosystem.
+2. **Minecraft 1.21.1 — Fabric.** Available in 1.2.0, with the same gadget, guide and upgrades; [source](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.21.1-fabric).
 3. **Minecraft 1.20.1 — Fabric.** Follow after the version backport and Fabric energy adapter are established.
 
 The order uses the September 11, 2026 snapshot from [MC Mod Popularity](https://skilles.github.io/MCModPopularity/). It ranks 1.20.1 as the most popular version. The snapshot lists 41,424 CurseForge modpacks for 1.20.1 and 14,017 for 1.21.1, compared with 772 for 1.21.4. These are catalog counts, not active-player counts. Loader support overlaps, and its loader charts group version families.
