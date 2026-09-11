@@ -35,9 +35,14 @@ The [wiki](https://github.com/shikyo13/Flux-Pylons/tree/main/docs/wiki) covers s
 | Minecraft | Loader | Java | Source |
 | --- | --- | --- | --- |
 | 1.21.1 | NeoForge 21.1.206 or later in the 21.1 series | 21 | [main](https://github.com/shikyo13/Flux-Pylons/tree/main) |
+| 1.21.1 | Forge 52.1.0 or later in the 52 series | 21 | [mc/1.21.1-forge](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.21.1-forge) |
+| 1.21.1 | Fabric Loader 0.16.14 or later | 21 | [mc/1.21.1-fabric](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.21.1-fabric) |
 | 1.20.1 | Forge 47.4.10 or later in the 47 series | 17 | [mc/1.20.1-forge](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-forge) |
+| 1.20.1 | Fabric Loader 0.16.14 or later | 17 | [mc/1.20.1-fabric](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-fabric) |
 
-Install the matching file on both the server and clients. An FE source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
+Install the matching file on both the server and clients. An energy source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
+
+The Fabric builds use [Fabric API](https://modrinth.com/mod/fabric-api) and [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port). Team Reborn's Energy API is bundled. Fabric energy is shown as E; Forge and NeoForge use FE.
 
 Use the file's version and loader tags when downloading. See the [roadmap](ROADMAP.md) for planned ports.
 
@@ -49,7 +54,7 @@ Use JDK 17 and the included Gradle wrapper:
 ./gradlew assemble
 ```
 
-The JAR is written to `build/libs/`. This branch targets Forge 1.20.1; the NeoForge branch uses JDK 21. [Release 1.2.0](https://github.com/shikyo13/Flux-Pylons/releases/tag/v1.2.0) includes both builds.
+The JAR is written to `build/libs/`. The 1.20.1 branches use JDK 17; 1.21.1 uses JDK 21. [Release 1.2.0](https://github.com/shikyo13/Flux-Pylons/releases/tag/v1.2.0) includes all five builds.
 
 For the full build and asset verification, install Python 3.13.3, `requirements-assets.txt`, and FFmpeg 8.0.1 with libvorbis. The [build workflow](.github/workflows/build.yml) pins the Linux FFmpeg build used for byte-identical audio:
 
@@ -66,5 +71,5 @@ Bug reports, translations and contributions are welcome. Read [CONTRIBUTING.md](
 
 You may play, research, contribute, redistribute unmodified official releases and include them in modpacks without asking. Retain the license and credit. Separately released modified builds, ports and feature variants require permission.
 
-Support ZeroTheAbsolute through [Buy Me a Coffee](https://buymeacoffee.com/zerotheabsolute) or [Patreon](https://www.patreon.com/cw/ZeroTheAbsolute/membership).
+Support me through [Buy Me a Coffee](https://buymeacoffee.com/zerotheabsolute) or [Patreon](https://www.patreon.com/cw/ZeroTheAbsolute/membership).
 
