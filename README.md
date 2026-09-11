@@ -4,7 +4,7 @@ Power nearby machines wirelessly, leaving their faces free for items, fluids and
 
 Feed a pylon from a generator or energy cell, link machines with the handheld Flux Gadget, and add more pylons to cover your base. Inspired by Draconic Evolution's wireless energy crystals and Tesla coils.
 
-[Download](https://www.curseforge.com/minecraft/mc-mods/flux-pylons) · [Wiki](https://github.com/shikyo13/Flux-Pylons/wiki) · [Issues](https://github.com/shikyo13/Flux-Pylons/issues) · [Discord](https://discord.gg/NrdXnbWzGC) · [Showcase](https://youtu.be/Ngc5F5Z9F7c)
+[Download](https://www.curseforge.com/minecraft/mc-mods/flux-pylons) · [Wiki](https://github.com/shikyo13/Flux-Pylons/tree/main/docs/wiki) · [Issues](https://github.com/shikyo13/Flux-Pylons/issues) · [Discord](https://discord.gg/NrdXnbWzGC) · [Showcase](https://youtu.be/Ngc5F5Z9F7c)
 
 ![Flux Pylon and Flux Gadget](docs/images/pylon-and-gadget.png)
 
@@ -28,7 +28,7 @@ Feed a pylon from a generator or energy cell, link machines with the handheld Fl
 5. Sneak-right-click the pylon, then right-click nearby machines to link them.
 6. Right-click the air to leave linking mode.
 
-The [wiki](https://github.com/shikyo13/Flux-Pylons/wiki) covers status readings, multiplayer, upgrades and troubleshooting.
+The [wiki](https://github.com/shikyo13/Flux-Pylons/tree/main/docs/wiki) covers status readings, multiplayer, upgrades and troubleshooting.
 
 ## Compatibility
 
