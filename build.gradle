@@ -35,8 +35,11 @@ tasks.withType(AbstractArchiveTask).configureEach {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 legacyForge {
-    // Specify the version of Forge to use.
-    version = "${project.minecraft_version}-${project.forge_version}"
+    // Plain JVM codec tests use the rebuilt Forge classes on local machines and CI.
+    enable {
+        forgeVersion = "${project.minecraft_version}-${project.forge_version}"
+        disableRecompilation = false
+    }
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
