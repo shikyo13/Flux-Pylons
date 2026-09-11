@@ -11,7 +11,7 @@ Power nearby machines without cables or a receiver block attached to each one. F
 - [Configuration](Configuration.md)
 - [Troubleshooting](Troubleshooting.md)
 
-Download the mod from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/flux-pylons). Version 1.2.0 supports **Minecraft 1.21.1 on NeoForge** and **Minecraft 1.20.1 on Forge**. Choose the matching file and install it on both the server and clients. Flux Pylons needs an energy source from another mod.
+Download the mod from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/flux-pylons). Version 1.2.0 supports **Minecraft 1.21.1 on NeoForge, Forge and Fabric**, plus **Minecraft 1.20.1 on Forge and Fabric**. Choose the matching file and install it on both the server and clients. Flux Pylons needs an energy source from another mod.
 
 ## Help and feedback
 
