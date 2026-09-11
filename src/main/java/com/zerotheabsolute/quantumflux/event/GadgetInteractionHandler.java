@@ -10,23 +10,24 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.level.ChunkWatchEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.ChunkWatchEvent;
+import net.minecraftforge.event.TickEvent;
 
 public class GadgetInteractionHandler {
 
     @SubscribeEvent
-    public static void onServerTick(ServerTickEvent.Post event) {
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) return;
         QFNetworking.flushNetworkListBroadcasts();
         QFNetworking.refreshActiveGadgetNetworkLists(event.getServer());
     }
 
     @SubscribeEvent
-    public static void onChunkSent(ChunkWatchEvent.Sent event) {
-        for (var blockEntity : event.getChunk().getBlockEntities().values()) {
+    public static void onChunkSent(ChunkWatchEvent.Watch event) {
+        for (var blockEntity : event.getLevel().getChunk(event.getPos().x, event.getPos().z).getBlockEntities().values()) {
             if (blockEntity instanceof com.zerotheabsolute.quantumflux.blockentity.QuantumPylonBlockEntity pylon) {
                 pylon.sendSyncTo(event.getPlayer());
             }
@@ -56,9 +57,9 @@ public class GadgetInteractionHandler {
         if (!(stack.getItem() instanceof QuantumGadgetItem)) return;
 
         // Gadget must be active for linking interactions
-        if (!Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()))) return;
+        if (!Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack))) return;
 
-        QFDataComponents.LinkingData linkData = stack.get(QFDataComponents.LINKING_DATA.get());
+        QFDataComponents.LinkingData linkData = QFDataComponents.LINKING_DATA.get(stack);
         if (linkData == null || !linkData.active()) return;
 
         // Don't intercept clicks on our own pylon — useOn handles those
@@ -80,19 +81,19 @@ public class GadgetInteractionHandler {
             ItemStack stack = player.getInventory().getItem(slot);
             if (!(stack.getItem() instanceof QuantumGadgetItem)) continue;
 
-            QFDataComponents.LinkingData linking = stack.get(QFDataComponents.LINKING_DATA.get());
+            QFDataComponents.LinkingData linking = QFDataComponents.LINKING_DATA.get(stack);
             if (linking != null && !currentDimension.equals(linking.dimension())) {
-                stack.remove(QFDataComponents.LINKING_DATA.get());
+                QFDataComponents.LINKING_DATA.remove(stack);
                 changed = true;
             }
 
-            String selectedDimension = stack.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
-            boolean hasSelection = stack.get(QFDataComponents.SELECTED_NETWORK.get()) != null;
+            String selectedDimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(stack);
+            boolean hasSelection = QFDataComponents.SELECTED_NETWORK.get(stack) != null;
             if ((clearSelection && hasSelection)
                     || (hasSelection && !currentDimension.equals(selectedDimension))) {
-                stack.remove(QFDataComponents.SELECTED_NETWORK.get());
-                stack.remove(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
-                stack.set(QFDataComponents.GADGET_COLOR.get(), QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
+                QFDataComponents.SELECTED_NETWORK.remove(stack);
+                QFDataComponents.SELECTED_NETWORK_DIMENSION.remove(stack);
+                QFDataComponents.GADGET_COLOR.set(stack, QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
                 changed = true;
             }
         }

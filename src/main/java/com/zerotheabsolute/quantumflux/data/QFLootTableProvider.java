@@ -22,13 +22,13 @@ public class QFLootTableProvider extends LootTableProvider {
     public QFLootTableProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
         super(output, Set.of(), List.of(
                 new SubProviderEntry(QFBlockLoot::new, LootContextParamSets.BLOCK)
-        ), registries);
+        ));
     }
 
     public static class QFBlockLoot extends BlockLootSubProvider {
 
-        protected QFBlockLoot(HolderLookup.Provider registries) {
-            super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
+        protected QFBlockLoot() {
+            super(Set.of(), FeatureFlags.REGISTRY.allFlags());
         }
 
         @Override

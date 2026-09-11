@@ -30,9 +30,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -57,37 +57,37 @@ public final class QuantumFluxGameTests {
         pylon.setRedstoneMode(com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_POWERED);
         storage.receiveEnergy(1_000, false);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pos, pylon.getBlockState(), pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 0, "Required absent signal did not pause");
-        helper.assertValueEqual(pylon.getConnectionStatus(receiver.getBlockPos()),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 0, "Required absent signal did not pause");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getConnectionStatus(receiver.getBlockPos()),
                 com.zerotheabsolute.quantumflux.util.ConnectionStatus.PAUSED, "Receiver pause explanation");
-        helper.assertValueEqual(storage.getEnergyStored(), 1_000, "Paused energy was lost");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, storage.getEnergyStored(), 1_000, "Paused energy was lost");
         helper.setBlock(PYLON_A.west(), Blocks.REDSTONE_BLOCK);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pos, pylon.getBlockState(), pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 1_000, "Bottom signal did not resume");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 1_000, "Bottom signal did not resume");
         helper.setBlock(PYLON_A.west(), Blocks.AIR);
         storage.receiveEnergy(1_000, false);
         helper.setBlock(PYLON_A.above().west(), Blocks.REDSTONE_BLOCK);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pos, pylon.getBlockState(), pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 2_000, "Top signal did not resume");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 2_000, "Top signal did not resume");
         pylon.setRedstoneMode(com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_UNPOWERED);
         storage.receiveEnergy(1_000, false);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pos, pylon.getBlockState(), pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 2_000, "Inverted signal did not pause");
-        var saved = pylon.saveWithoutMetadata(helper.getLevel().registryAccess());
-        pylon.loadWithComponents(saved, helper.getLevel().registryAccess());
-        helper.assertValueEqual(pylon.getRedstoneMode(), com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_UNPOWERED,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 2_000, "Inverted signal did not pause");
+        var saved = pylon.saveWithoutMetadata();
+        pylon.load(saved);
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getRedstoneMode(), com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_UNPOWERED,
                 "Redstone mode persistence");
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 1_000, "Paused energy persistence");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getEnergyStored(), 1_000, "Paused energy persistence");
         helper.setBlock(PYLON_A.above().west(), Blocks.AIR);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pos, pylon.getBlockState(), pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 3_000, "Removing the signal did not resume");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 3_000, "Removing the signal did not resume");
         saved.remove("RedstoneMode");
-        pylon.loadWithComponents(saved, helper.getLevel().registryAccess());
-        helper.assertValueEqual(pylon.getRedstoneMode(), com.zerotheabsolute.quantumflux.util.RedstoneMode.IGNORE,
+        pylon.load(saved);
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getRedstoneMode(), com.zerotheabsolute.quantumflux.util.RedstoneMode.IGNORE,
                 "Prototype saves must keep always-enabled output");
         helper.setBlock(PYLON_A.west(), Blocks.REDSTONE_BLOCK);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), pos, pylon.getBlockState(), pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 4_000, "Ignored redstone blocked output");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 4_000, "Ignored redstone blocked output");
         helper.succeed();
     }
 
@@ -107,12 +107,12 @@ public final class QuantumFluxGameTests {
             pylon.setNetworkId(network.getUuid());
         }
         paused.setRedstoneMode(com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_POWERED);
-        helper.assertValueEqual(paused.getEnergyStorage().receiveEnergy(1_000, false), 1_000, "Paused pylon refused FE input");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, paused.getEnergyStorage().receiveEnergy(1_000, false), 1_000, "Paused pylon refused FE input");
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), paused.getBlockPos(), paused.getBlockState(), paused);
         QuantumPylonBlockEntity.serverTick(helper.getLevel(), active.getBlockPos(), active.getBlockState(), active);
-        helper.assertValueEqual(pausedReceiver.getEnergyStorage().getEnergyStored(), 0, "Paused network pylon delivered FE");
-        helper.assertValueEqual(activeReceiver.getEnergyStorage().getEnergyStored(), 1_000, "Paused buffer blocked another pylon");
-        helper.assertValueEqual(paused.getEnergyStorage().getEnergyStored() + active.getEnergyStorage().getEnergyStored(), 0,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pausedReceiver.getEnergyStorage().getEnergyStored(), 0, "Paused network pylon delivered FE");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, activeReceiver.getEnergyStorage().getEnergyStored(), 1_000, "Paused buffer blocked another pylon");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, paused.getEnergyStorage().getEnergyStored() + active.getEnergyStorage().getEnergyStored(), 0,
                 "Network redstone delivery duplicated FE");
         var snapshot = com.zerotheabsolute.quantumflux.network.NetworkTelemetryPayload.capture(helper.getLevel(), network);
         helper.assertFalse(snapshot.pylons().stream().filter(row -> row.pos().equals(paused.getBlockPos())).findFirst().orElseThrow().outputEnabled(),
@@ -133,19 +133,19 @@ public final class QuantumFluxGameTests {
 
         level.getChunkAt(absolutePos).setUnsaved(false);
         int simulated = capability.receiveEnergy(12_345, true);
-        helper.assertValueEqual(simulated, 12_345, "Simulated receive amount");
-        helper.assertValueEqual(capability.getEnergyStored(), 0, "Simulation must not mutate energy");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, simulated, 12_345, "Simulated receive amount");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, capability.getEnergyStored(), 0, "Simulation must not mutate energy");
         helper.assertFalse(level.getChunkAt(absolutePos).isUnsaved(),
                 "Simulation must not dirty the containing chunk");
 
         int accepted = capability.receiveEnergy(12_345, false);
-        helper.assertValueEqual(accepted, 12_345, "Committed receive amount");
-        helper.assertValueEqual(capability.getEnergyStored(), 12_345, "Stored FE after receive");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, accepted, 12_345, "Committed receive amount");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, capability.getEnergyStored(), 12_345, "Stored FE after receive");
         helper.assertTrue(level.getChunkAt(absolutePos).isUnsaved(),
                 "Committed receive must dirty the containing chunk");
 
-        CompoundTag serialized = pylon.saveWithoutMetadata(level.registryAccess());
-        helper.assertValueEqual(serialized.getInt("Energy"), 12_345,
+        CompoundTag serialized = pylon.saveWithoutMetadata();
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, serialized.getInt("Energy"), 12_345,
                 "Committed receive must be present in serialized block-entity state");
         helper.succeed();
     }
@@ -157,18 +157,18 @@ public final class QuantumFluxGameTests {
         int expectedEnergy = Math.max(1, configuredCapacity * 3 / 5);
         original.getEnergyStorage().setEnergy(expectedEnergy);
 
-        CompoundTag serialized = original.saveWithoutMetadata(helper.getLevel().registryAccess());
+        CompoundTag serialized = original.saveWithoutMetadata();
         QuantumPylonBlockEntity loaded = new QuantumPylonBlockEntity(
                 BlockPos.ZERO,
                 pylonBottomState()
         );
-        loaded.loadWithComponents(serialized, helper.getLevel().registryAccess());
+        loaded.load(serialized);
 
-        helper.assertValueEqual(loaded.getEnergyStorage().getEnergyStored(), expectedEnergy,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, loaded.getEnergyStorage().getEnergyStored(), expectedEnergy,
                 "NBT round-trip stored FE");
-        helper.assertValueEqual(loaded.getEnergyStorage().getMaxEnergyStored(), configuredCapacity,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, loaded.getEnergyStorage().getMaxEnergyStored(), configuredCapacity,
                 "NBT round-trip configured capacity");
-        helper.assertValueEqual(serialized.getInt("MaxEnergy"), configuredCapacity,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, serialized.getInt("MaxEnergy"), configuredCapacity,
                 "Serialized diagnostic capacity");
         helper.succeed();
     }
@@ -213,14 +213,14 @@ public final class QuantumFluxGameTests {
                     "Pylon block entity was absent after actual chunk reload");
             QuantumPylonBlockEntity reloaded =
                     (QuantumPylonBlockEntity) level.getBlockEntity(remotePos);
-            helper.assertValueEqual(reloaded.getEnergyStorage().getEnergyStored(), expectedEnergy,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, reloaded.getEnergyStorage().getEnergyStored(), expectedEnergy,
                     "Energy after actual chunk reload");
-            helper.assertValueEqual(reloaded.getNetworkId(), expectedNetwork,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, reloaded.getNetworkId(), expectedNetwork,
                     "Block-entity network identity after actual chunk reload");
             QFNetwork reloadedNetwork = manager.getNetworkForPylon(remotePos);
             helper.assertTrue(reloadedNetwork != null,
                     "SavedData network membership disappeared after actual chunk reload");
-            helper.assertValueEqual(reloadedNetwork.getUuid(), expectedNetwork,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, reloadedNetwork.getUuid(), expectedNetwork,
                     "SavedData network identity after actual chunk reload");
         });
     }
@@ -262,22 +262,22 @@ public final class QuantumFluxGameTests {
         legacy.put("networks", networks);
 
         QuantumFluxNetworkManager migrated = QuantumFluxNetworkManager.load(
-                legacy, helper.getLevel().registryAccess());
-        helper.assertValueEqual(migrated.getAllNetworks().size(), total,
+                legacy);
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, migrated.getAllNetworks().size(), total,
                 "Legacy overflow network count");
         java.util.List<QFNetwork> ordered = migrated.getAllNetworks().stream()
                 .sorted(java.util.Comparator.comparingInt(QFNetwork::getNumericId))
                 .toList();
-        helper.assertValueEqual(
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper,
                 ordered.get(QuantumFluxNetworkManager.MAX_NETWORKS_PER_DIMENSION - 1).getAccessMode(),
                 QFNetwork.AccessMode.PUBLIC,
                 "Last in-cap legacy network access mode");
-        helper.assertValueEqual(
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper,
                 ordered.get(QuantumFluxNetworkManager.MAX_NETWORKS_PER_DIMENSION).getAccessMode(),
                 QFNetwork.AccessMode.PRIVATE,
                 "First overflow legacy network access mode");
-        CompoundTag resaved = migrated.save(new CompoundTag(), helper.getLevel().registryAccess());
-        helper.assertValueEqual(resaved.getInt("overflowMigrationVersion"), 1,
+        CompoundTag resaved = migrated.save(new CompoundTag());
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, resaved.getInt("overflowMigrationVersion"), 1,
                 "Overflow migration version");
         helper.succeed();
     }
@@ -327,24 +327,24 @@ public final class QuantumFluxGameTests {
         BlockPos claimedPylon = helper.absolutePos(new BlockPos(10, 1, 10));
         helper.assertTrue(manager.addPylon(first.getUuid(), claimedPylon),
                 "Failed to establish pylon ownership fixture");
-        helper.assertValueEqual(manager.assignPylon(second.getUuid(), claimedPylon, secondOwner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, manager.assignPylon(second.getUuid(), claimedPylon, secondOwner),
                 QuantumFluxNetworkManager.PylonMutationResult.ASSIGNED_TO_OTHER_NETWORK,
                 "Destination owner stole a pylon without current-network access");
-        helper.assertValueEqual(manager.assignPylon(second.getUuid(), claimedPylon, firstOwner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, manager.assignPylon(second.getUuid(), claimedPylon, firstOwner),
                 QuantumFluxNetworkManager.PylonMutationResult.FORBIDDEN,
                 "Current owner transferred a pylon without destination access");
-        helper.assertValueEqual(manager.assignPylon(second.getUuid(), claimedPylon, sharedMember),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, manager.assignPylon(second.getUuid(), claimedPylon, sharedMember),
                 QuantumFluxNetworkManager.PylonMutationResult.SUCCESS,
                 "Member of both networks could not transfer a pylon");
-        helper.assertValueEqual(manager.unassignPylon(claimedPylon, firstOwner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, manager.unassignPylon(claimedPylon, firstOwner),
                 QuantumFluxNetworkManager.PylonMutationResult.FORBIDDEN,
                 "Former owner unassigned a transferred pylon");
-        helper.assertValueEqual(manager.unassignPylon(claimedPylon, secondOwner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, manager.unassignPylon(claimedPylon, secondOwner),
                 QuantumFluxNetworkManager.PylonMutationResult.SUCCESS,
                 "Current owner could not unassign a pylon");
         helper.assertTrue(manager.updatePresentation(second.getUuid(), sharedMember,
                 BeamStyle.PULSE, false), "Authorized member could not update network presentation");
-        helper.assertValueEqual(second.getBeamStyle(), BeamStyle.PULSE,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, second.getBeamStyle(), BeamStyle.PULSE,
                 "Network beam style was not retained");
         helper.assertFalse(second.isBeamsVisible(), "Network beam visibility was not retained");
 
@@ -368,14 +368,14 @@ public final class QuantumFluxGameTests {
         helper.assertTrue(passwordNetwork.canConfigure(stranger),
                 "Successful password join did not grant membership");
 
-        CompoundTag savedNetworks = manager.save(new CompoundTag(), helper.getLevel().registryAccess());
+        CompoundTag savedNetworks = manager.save(new CompoundTag());
         helper.assertFalse(savedNetworks.toString().contains(password),
                 "World data stored the plaintext password");
         QuantumFluxNetworkManager reloaded = QuantumFluxNetworkManager.load(
-                savedNetworks, helper.getLevel().registryAccess());
+                savedNetworks);
         QFNetwork reloadedSecond = reloaded.getNetwork(second.getUuid());
         helper.assertTrue(reloadedSecond != null, "Presentation network missing after SavedData round-trip");
-        helper.assertValueEqual(reloadedSecond.getBeamStyle(), BeamStyle.PULSE,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, reloadedSecond.getBeamStyle(), BeamStyle.PULSE,
                 "Beam style failed SavedData round-trip");
         helper.assertFalse(reloadedSecond.isBeamsVisible(),
                 "Beam visibility failed SavedData round-trip");
@@ -406,10 +406,10 @@ public final class QuantumFluxGameTests {
             int firstEnergy = first.getEnergyStorage().getEnergyStored();
             int secondEnergy = second.getEnergyStorage().getEnergyStored();
             int thirdEnergy = third.getEnergyStorage().getEnergyStored();
-            helper.assertValueEqual(firstEnergy, 1, "First pylon balanced FE");
-            helper.assertValueEqual(secondEnergy, 1, "Second pylon balanced FE");
-            helper.assertValueEqual(thirdEnergy, 0, "Third pylon balanced FE");
-            helper.assertValueEqual(firstEnergy + secondEnergy + thirdEnergy, 2,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, firstEnergy, 1, "First pylon balanced FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, secondEnergy, 1, "Second pylon balanced FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, thirdEnergy, 0, "Third pylon balanced FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, firstEnergy + secondEnergy + thirdEnergy, 2,
                     "Balancing must conserve every FE unit");
         });
     }
@@ -430,7 +430,7 @@ public final class QuantumFluxGameTests {
             int targetEnergy = target.getEnergyStorage().getEnergyStored();
             helper.assertTrue(targetEnergy > 0,
                     "Wireless distribution never delivered FE through the target capability");
-            helper.assertValueEqual(sourceEnergy + targetEnergy, initialEnergy,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, sourceEnergy + targetEnergy, initialEnergy,
                     "Wireless transfer created or destroyed FE");
         });
     }
@@ -453,7 +453,7 @@ public final class QuantumFluxGameTests {
             helper.assertTrue(source.tryLink(target.getBlockPos()), "Could not link fairness fixture");
         }
         helper.succeedWhen(() -> {
-            helper.assertValueEqual(helper.getLevel().getGameTime() % QFConfig.TICK_INTERVAL.get(),
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, helper.getLevel().getGameTime() % QFConfig.TICK_INTERVAL.get(),
                     0L, "Wait for a configured distribution tick");
             // Execute real distribution ticks without replenishing the source
             // until its preceding input has been accounted for.
@@ -465,13 +465,13 @@ public final class QuantumFluxGameTests {
                 int a = first.getEnergyStorage().getEnergyStored();
                 int b = second.getEnergyStorage().getEnergyStored();
                 int c = third.getEnergyStorage().getEnergyStored();
-                helper.assertValueEqual(a + b + c, supplied, "Every supplied FE reaches a target");
+                com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, a + b + c, supplied, "Every supplied FE reaches a target");
                 helper.assertTrue(Math.max(a, Math.max(b, c)) - Math.min(a, Math.min(b, c)) <= 1,
                         "Equal distribution must not favor the first links under scarce power");
             }
-            helper.assertValueEqual(first.getEnergyStorage().getEnergyStored(), 6, "First consumer share");
-            helper.assertValueEqual(second.getEnergyStorage().getEnergyStored(), 6, "Second consumer share");
-            helper.assertValueEqual(third.getEnergyStorage().getEnergyStored(), 6, "Third consumer share");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, first.getEnergyStorage().getEnergyStored(), 6, "First consumer share");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, second.getEnergyStorage().getEnergyStored(), 6, "Second consumer share");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, third.getEnergyStorage().getEnergyStored(), 6, "Third consumer share");
         });
     }
 
@@ -486,12 +486,12 @@ public final class QuantumFluxGameTests {
         helper.assertTrue(source.tryLink(accepting.getBlockPos()), "Could not link accepting target");
         source.getEnergyStorage().receiveEnergy(101, false);
         helper.succeedWhen(() -> {
-            helper.assertValueEqual(source.getEnergyStorage().getEnergyStored(), 0, "Source must use its budget");
-            helper.assertValueEqual(full.getEnergyStorage().getEnergyStored(), capacity, "Near-full receiver gets one FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, source.getEnergyStorage().getEnergyStored(), 0, "Source must use its budget");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, full.getEnergyStorage().getEnergyStored(), capacity, "Near-full receiver gets one FE");
             helper.assertTrue(source.getConnectionStatus(full.getBlockPos())
                             == com.zerotheabsolute.quantumflux.util.ConnectionStatus.FULL,
                     "A full exposed input must have an actionable full status");
-            helper.assertValueEqual(accepting.getEnergyStorage().getEnergyStored(), 100, "Unused share reaches accepting receiver");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, accepting.getEnergyStorage().getEnergyStored(), 100, "Unused share reaches accepting receiver");
         });
     }
 
@@ -507,13 +507,13 @@ public final class QuantumFluxGameTests {
         source.getEnergyStorage().receiveEnergy(73, false);
         helper.runAfterDelay(25, () -> {
             helper.assertTrue(source.isLinkedTo(targetPos), "A temporarily absent input deleted the link");
-            helper.assertValueEqual(source.getEnergyStorage().getEnergyStored(), 73,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, source.getEnergyStorage().getEnergyStored(), 73,
                     "Unavailable input must not consume source FE");
             EnergyReceiverFixture restored = EnergyReceiverFixture.place(helper, PYLON_B);
             helper.succeedWhen(() -> {
-                helper.assertValueEqual(restored.getEnergyStorage().getEnergyStored(), 73,
+                com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, restored.getEnergyStorage().getEnergyStored(), 73,
                         "Delivery did not resume through the restored real FE capability");
-                helper.assertValueEqual(source.getEnergyStorage().getEnergyStored(), 0,
+                com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, source.getEnergyStorage().getEnergyStored(), 0,
                         "Resumed delivery must conserve FE");
             });
         });
@@ -525,12 +525,11 @@ public final class QuantumFluxGameTests {
         EnergyReceiverFixture target = EnergyReceiverFixture.place(helper, PYLON_B);
         helper.assertTrue(source.tryLink(target.getBlockPos()), "Input must initially link");
         target.getEnergyStorage().externalInputEnabled = false;
-        helper.getLevel().invalidateCapabilities(target.getBlockPos());
         helper.assertTrue(!com.zerotheabsolute.quantumflux.util.EnergyHelper.blockAcceptsEnergy(
                 helper.getLevel(), target.getBlockPos()), "Internal-only capability is not a wireless input");
         source.getEnergyStorage().receiveEnergy(73, false);
         helper.runAfterDelay(25, () -> {
-            helper.assertValueEqual(source.getEnergyStorage().getEnergyStored(), 73,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, source.getEnergyStorage().getEnergyStored(), 73,
                     "Internal access must not bypass disabled faces");
             helper.assertTrue(source.getConnectionStatus(target.getBlockPos())
                             == com.zerotheabsolute.quantumflux.util.ConnectionStatus.INPUT_UNAVAILABLE,
@@ -538,12 +537,11 @@ public final class QuantumFluxGameTests {
             helper.assertTrue(source.isLinkedTo(target.getBlockPos()), "Side settings must retain links");
             target.getEnergyStorage().externalInputEnabled = true;
             target.getEnergyStorage().acceptingEnergy = false;
-            helper.getLevel().invalidateCapabilities(target.getBlockPos());
             helper.assertTrue(source.getConnectionStatus(target.getBlockPos())
                             == com.zerotheabsolute.quantumflux.util.ConnectionStatus.NOT_ACCEPTING,
                     "An empty rejecting machine must not be described as full");
             target.getEnergyStorage().acceptingEnergy = true;
-            helper.succeedWhen(() -> helper.assertValueEqual(target.getEnergyStorage().getEnergyStored(), 73,
+            helper.succeedWhen(() -> com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, target.getEnergyStorage().getEnergyStored(), 73,
                     "The enabled external input must receive retained energy"));
         });
     }
@@ -555,11 +553,11 @@ public final class QuantumFluxGameTests {
         helper.assertTrue(source.tryLink(target.getBlockPos()), "Could not link activity fixture");
         source.getEnergyStorage().receiveEnergy(1, false);
         helper.runAfterDelay(20, () -> {
-            helper.assertValueEqual(source.getEnergyStorage().getEnergyStored(), 0, "Delivery drains source buffer");
-            helper.assertValueEqual(target.getEnergyStorage().getEnergyStored(), 1, "Delivered FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, source.getEnergyStorage().getEnergyStored(), 0, "Delivery drains source buffer");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, target.getEnergyStorage().getEnergyStored(), 1, "Delivered FE");
             helper.assertTrue(source.getTotalThroughput() == 0.05,
                     "One FE over 20 ticks must report its actual 0.05 FE/t rate");
-            helper.assertTrue(source.getConnections().getFirst().getLastTransferred() == 0.05,
+            helper.assertTrue(source.getConnections().get(0).getLastTransferred() == 0.05,
                     "The machine reading must agree with the pylon");
             for (BlockPos pos : new BlockPos[]{source.getBlockPos(), source.getBlockPos().above()}) {
                 helper.assertTrue(helper.getLevel().getBlockState(pos).getValue(QuantumPylonBlock.ACTIVE),
@@ -589,14 +587,14 @@ public final class QuantumFluxGameTests {
             helper.assertTrue(source.tryLink(target.getBlockPos()), "Could not link blocked-trickle fixture");
         }
         helper.succeedWhen(() -> {
-            helper.assertValueEqual(helper.getLevel().getGameTime() % QFConfig.TICK_INTERVAL.get(),
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, helper.getLevel().getGameTime() % QFConfig.TICK_INTERVAL.get(),
                     0L, "Wait for a configured distribution tick");
             for (int supplied = 1; supplied <= 12; supplied++) {
                 source.getEnergyStorage().receiveEnergy(1, false);
                 tickPylon(helper, source);
                 int a = first.getEnergyStorage().getEnergyStored();
                 int b = second.getEnergyStorage().getEnergyStored();
-                helper.assertValueEqual(a + b, supplied, "Full first target must not block a single FE");
+                com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, a + b, supplied, "Full first target must not block a single FE");
                 helper.assertTrue(Math.abs(a - b) <= 1, "Trickle must rotate among accepting targets");
             }
         });
@@ -633,9 +631,9 @@ public final class QuantumFluxGameTests {
                     .thenWaitUntil(() -> {
                         int a = first.getEnergyStorage().getEnergyStored();
                         int b = second.getEnergyStorage().getEnergyStored();
-                        helper.assertValueEqual(a + b, expected, "Every input FE must reach remote machines");
+                        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, a + b, expected, "Every input FE must reach remote machines");
                         helper.assertTrue(Math.abs(a - b) <= 1, "Scarce FE must rotate between remote pylons");
-                        helper.assertValueEqual(input.getEnergyStorage().getEnergyStored()
+                        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, input.getEnergyStorage().getEnergyStored()
                                 + firstRelay.getEnergyStorage().getEnergyStored()
                                 + secondRelay.getEnergyStorage().getEnergyStored(), 0,
                                 "Usable FE must not remain stranded in an input-only pylon");
@@ -667,14 +665,14 @@ public final class QuantumFluxGameTests {
             int afterCoordinator = accepting.getEnergyStorage().getEnergyStored();
             tickPylon(helper, blockedRelay);
             tickPylon(helper, activeRelay);
-            helper.assertValueEqual(accepting.getEnergyStorage().getEnergyStored(), afterCoordinator,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, accepting.getEnergyStorage().getEnergyStored(), afterCoordinator,
                     "Later member ticks must not spend the network's cycle budget again");
-            helper.assertValueEqual(accepting.getEnergyStorage().getEnergyStored()
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, accepting.getEnergyStorage().getEnergyStored()
                     + input.getEnergyStorage().getEnergyStored()
                     + blockedRelay.getEnergyStorage().getEnergyStored()
                     + activeRelay.getEnergyStorage().getEnergyStored(), supplied,
                     "Partial remote delivery must conserve the entire pool");
-            helper.assertValueEqual(accepting.getEnergyStorage().getEnergyStored(), supplied,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, accepting.getEnergyStorage().getEnergyStored(), supplied,
                     "Full remote receivers must not strand usable FE");
         });
     }
@@ -692,8 +690,8 @@ public final class QuantumFluxGameTests {
                 first.getBlockPos(), "Legacy return link"));
         first.getEnergyStorage().receiveEnergy(73, false);
         helper.runAfterDelay(25, () -> {
-            helper.assertValueEqual(first.getEnergyStorage().getEnergyStored(), 73, "Legacy loop retains source FE");
-            helper.assertValueEqual(second.getEnergyStorage().getEnergyStored(), 0, "Legacy loop never circulates FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, first.getEnergyStorage().getEnergyStored(), 73, "Legacy loop retains source FE");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, second.getEnergyStorage().getEnergyStored(), 0, "Legacy loop never circulates FE");
             helper.assertTrue(first.getTotalThroughput() + second.getTotalThroughput() == 0,
                     "Pylon circulation must not produce phantom throughput");
             helper.succeed();
@@ -711,27 +709,68 @@ public final class QuantumFluxGameTests {
     }
 
     @GameTest(template = EMPTY_TEMPLATE)
+    public static void gadgetStateSurvivesVanillaItemSaveAndRemoval(GameTestHelper helper) {
+        ItemStack gadget = new ItemStack(QFItems.QUANTUM_GADGET.get());
+        UUID network = UUID.randomUUID();
+        var linking = new QFDataComponents.LinkingData("minecraft:overworld", new BlockPos(5, 70, -9), true);
+        gadget.setHoverName(net.minecraft.network.chat.Component.literal("Workshop controller"));
+        QFDataComponents.LINKING_DATA.set(gadget, linking);
+        QFDataComponents.SELECTED_NETWORK.set(gadget, network);
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.set(gadget, "minecraft:overworld");
+        QFDataComponents.GADGET_COLOR.set(gadget, 0x45DDDD);
+        QFDataComponents.GADGET_ACTIVE.set(gadget, true);
+        ItemStack loaded = ItemStack.of(gadget.save(new CompoundTag()));
+        FixtureAssertions.equal(helper, QFDataComponents.LINKING_DATA.get(loaded), linking, "Linking state survives item save");
+        FixtureAssertions.equal(helper, QFDataComponents.SELECTED_NETWORK.get(loaded), network, "Selected network survives item save");
+        FixtureAssertions.equal(helper, QFDataComponents.SELECTED_NETWORK_DIMENSION.get(loaded), "minecraft:overworld", "Selected dimension survives item save");
+        FixtureAssertions.equal(helper, QFDataComponents.GADGET_COLOR.get(loaded), 0x45DDDD, "Gadget color survives item save");
+        helper.assertTrue(Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(loaded)), "Active gadget survives item save");
+        QFDataComponents.LINKING_DATA.remove(loaded);
+        helper.assertTrue(QFDataComponents.LINKING_DATA.get(loaded) == null, "Cleared link stays cleared");
+        FixtureAssertions.equal(helper, QFDataComponents.SELECTED_NETWORK.get(loaded), network, "Clearing link retains network");
+        FixtureAssertions.equal(helper, loaded.getHoverName().getString(), "Workshop controller", "Gadget state retains unrelated item NBT");
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE)
+    public static void forgeEnergyCapabilityRefreshesAfterLoad(GameTestHelper helper) {
+        var pylon = placePylon(helper, PYLON_A);
+        var capability = pylon.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ENERGY, Direction.WEST);
+        helper.assertTrue(capability.isPresent(), "Forge energy input is exposed");
+        FixtureAssertions.equal(helper, capability.orElseThrow(IllegalStateException::new).receiveEnergy(173, false), 173, "Forge energy input receives power");
+        var saved = pylon.saveWithoutMetadata();
+        pylon.load(saved);
+        helper.assertFalse(capability.isPresent(), "Load invalidates the previous storage capability");
+        var restored = pylon.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ENERGY, Direction.EAST).orElseThrow(IllegalStateException::new);
+        FixtureAssertions.equal(helper, restored.getEnergyStored(), 173, "Reload retains stored power");
+        restored.receiveEnergy(27, false);
+        FixtureAssertions.equal(helper, pylon.getEnergyStorage().getEnergyStored(), 200, "Reloaded capability points to active storage");
+        FixtureAssertions.equal(helper, restored.extractEnergy(200, false), 0, "External machines cannot drain the pylon buffer");
+        helper.succeed();
+    }
+
+    @GameTest(template = EMPTY_TEMPLATE)
     public static void linkingDataCodecRejectsInvalidDimensions(GameTestHelper helper) {
         var valid = new com.google.gson.JsonObject();
         valid.addProperty("dimension", "minecraft:overworld");
-        valid.add("pylon_pos", BlockPos.CODEC.encodeStart(JsonOps.INSTANCE, BlockPos.ZERO).getOrThrow());
+        valid.add("pylon_pos", BlockPos.CODEC.encodeStart(JsonOps.INSTANCE, BlockPos.ZERO).result().orElseThrow());
         valid.addProperty("active", true);
-        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, valid).isSuccess(),
+        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, valid).result().isPresent(),
                 "Valid dimension identifier was rejected");
 
         var legacy = valid.deepCopy();
         legacy.addProperty("dimension", "");
-        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, legacy).isSuccess(),
+        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, legacy).result().isPresent(),
                 "Legacy empty dimension identifier was rejected");
 
         var oversized = valid.deepCopy();
         oversized.add("dimension", new JsonPrimitive("a:" + "b".repeat(129)));
-        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, oversized).isError(),
+        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, oversized).error().isPresent(),
                 "Oversized dimension identifier was accepted");
 
         var malformed = valid.deepCopy();
         malformed.addProperty("dimension", "Not A Resource Location");
-        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, malformed).isError(),
+        helper.assertTrue(QFDataComponents.LinkingData.CODEC.parse(JsonOps.INSTANCE, malformed).error().isPresent(),
                 "Malformed dimension identifier was accepted");
         helper.succeed();
     }
@@ -763,7 +802,7 @@ public final class QuantumFluxGameTests {
     private static void assertComparator(GameTestHelper helper, BlockState state, ServerLevel level,
                                          BlockPos absolutePos, int expected) {
         int actual = QFBlocks.QUANTUM_PYLON.get().getAnalogOutputSignal(state, level, absolutePos);
-        helper.assertValueEqual(actual, expected, "Comparator output after FE transition");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, actual, expected, "Comparator output after FE transition");
     }
 
     private static void assignPylon(GameTestHelper helper, QuantumFluxNetworkManager manager,
@@ -775,18 +814,28 @@ public final class QuantumFluxGameTests {
         pylon.setNetworkId(network.getUuid());
     }
 
+    private static net.minecraft.world.entity.player.Player makeMockPlayer(GameTestHelper helper, GameType mode) {
+        return new net.minecraft.world.entity.player.Player(helper.getLevel(), BlockPos.ZERO, 0,
+                new com.mojang.authlib.GameProfile(UUID.randomUUID(), "test-mock-player")) {
+            @Override public boolean isSpectator() { return false; }
+            @Override public boolean isCreative() { return mode == GameType.CREATIVE; }
+            @Override public boolean isLocalPlayer() { return true; }
+        };
+    }
+
     /** Mirrors the survival branch of ServerPlayerGameMode#destroyBlock. */
     private static void breakPylonHalfAsSurvivalPlayer(GameTestHelper helper, BlockPos relativePos) {
         ServerLevel level = helper.getLevel();
         BlockPos absolutePos = helper.absolutePos(relativePos);
-        var player = helper.makeMockPlayer(GameType.SURVIVAL);
+        var player = makeMockPlayer(helper, GameType.SURVIVAL);
         ItemStack tool = new ItemStack(Items.IRON_PICKAXE);
         player.setItemInHand(InteractionHand.MAIN_HAND, tool);
 
         BlockState originalState = level.getBlockState(absolutePos);
         BlockEntity blockEntity = level.getBlockEntity(absolutePos);
         Block block = originalState.getBlock();
-        BlockState destroyState = block.playerWillDestroy(level, absolutePos, originalState, player);
+        block.playerWillDestroy(level, absolutePos, originalState, player);
+        BlockState destroyState = originalState;
         boolean canHarvest = destroyState.canHarvestBlock(level, absolutePos, player);
         ItemStack lootTool = tool.copy();
         tool.mineBlock(level, destroyState, absolutePos, player);
@@ -804,10 +853,11 @@ public final class QuantumFluxGameTests {
     private static void breakPylonHalfAsCreativePlayer(GameTestHelper helper, BlockPos relativePos) {
         ServerLevel level = helper.getLevel();
         BlockPos absolutePos = helper.absolutePos(relativePos);
-        var player = helper.makeMockPlayer(GameType.CREATIVE);
+        var player = makeMockPlayer(helper, GameType.CREATIVE);
         BlockState originalState = level.getBlockState(absolutePos);
         Block block = originalState.getBlock();
-        BlockState destroyState = block.playerWillDestroy(level, absolutePos, originalState, player);
+        block.playerWillDestroy(level, absolutePos, originalState, player);
+        BlockState destroyState = originalState;
         boolean removed = destroyState.onDestroyedByPlayer(
                 level, absolutePos, player, false, level.getFluidState(absolutePos));
         // ServerPlayerGameMode's creative branch intentionally ignores the remove result.

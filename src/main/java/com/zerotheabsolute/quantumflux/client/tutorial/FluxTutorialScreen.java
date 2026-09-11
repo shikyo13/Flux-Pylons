@@ -22,7 +22,6 @@ public final class FluxTutorialScreen extends Screen {
     private final List<Button> chapters = new ArrayList<>();
     private TutorialSeekBar timeline;
     private Transport previous, play, next;
-    private boolean renderingWidgets;
     private int left, top, panelWidth, panelHeight, sceneTop, sceneHeight, captionTop, controlsTop;
 
     private FluxTutorialScreen(Screen parent, int chapter) {
@@ -81,7 +80,7 @@ public final class FluxTutorialScreen extends Screen {
 
     @Override public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         playback.onFrame(System.nanoTime());
-        renderBackground(graphics, mouseX, mouseY, delta);
+        renderBackground(graphics);
         graphics.fill(left, top, left + panelWidth, top + panelHeight, 0xF51B1E21);
         graphics.renderOutline(left, top, panelWidth, panelHeight, COPPER);
         graphics.drawCenteredString(font, title, width / 2, top + 8, ACCENT);
@@ -113,13 +112,7 @@ public final class FluxTutorialScreen extends Screen {
         }
         if (panelWidth >= 290) graphics.drawCenteredString(font, text("time", (int) playback.elapsedSeconds(),
                 (int) playback.duration()), (left + 112 + left + panelWidth - 82) / 2, controlsTop + 7, MUTED);
-        renderingWidgets = true;
-        try { super.render(graphics, mouseX, mouseY, delta); }
-        finally { renderingWidgets = false; }
-    }
-
-    @Override public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        if (!renderingWidgets) super.renderBackground(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
     }
 
     @Override public boolean keyPressed(int key, int scanCode, int modifiers) {

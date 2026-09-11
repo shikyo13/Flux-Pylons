@@ -33,7 +33,7 @@ public final class FairEnergyDistributor {
                 int index = accepting.get(slot);
                 int offer = (int) Math.min(limits[index] - delivered[index],
                         share + (slot < remainder ? 1 : 0));
-                int sent = offer == 0 ? 0 : Math.clamp(sender.applyAsInt(index, offer), 0, offer);
+                int sent = offer == 0 ? 0 : com.zerotheabsolute.quantumflux.util.Numbers.clamp(sender.applyAsInt(index, offer), 0, offer);
                 delivered[index] += sent;
                 remaining -= sent;
                 sentThisPass += sent;
@@ -50,7 +50,7 @@ public final class FairEnergyDistributor {
             int index = (start + offset) % count;
             int offer = (int) Math.min(remaining, Math.max(0, limits[index] - delivered[index]));
             if (offer == 0) continue;
-            int sent = Math.clamp(sender.applyAsInt(index, offer), 0, offer);
+            int sent = com.zerotheabsolute.quantumflux.util.Numbers.clamp(sender.applyAsInt(index, offer), 0, offer);
             delivered[index] += sent;
             remaining -= sent;
             if (sent > 0) next = (index + 1) % count;

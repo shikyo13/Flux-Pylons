@@ -20,12 +20,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 @GameTestHolder(QuantumFlux.MODID)
 @PrefixGameTestTemplate(false)
@@ -44,29 +44,29 @@ public final class QFNetworkingGameTests {
         BlockPos absolutePos = helper.absolutePos(PYLON_POS);
 
         GadgetActionPayload valid = priorityPayload(absolutePos, PriorityMode.ROUND_ROBIN, 11);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(valid, owner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(valid, owner),
                 ActionResultS2CPayload.Result.APPLIED,
                 "Authorized payload result");
-        helper.assertValueEqual(pylon.getPriorityMode(), PriorityMode.ROUND_ROBIN,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getPriorityMode(), PriorityMode.ROUND_ROBIN,
                 "Authorized payload mutation");
-        helper.assertValueEqual(QFNetworking.processGadgetAction(new GadgetActionPayload(
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(new GadgetActionPayload(
                         absolutePos, GadgetAction.SET_REDSTONE_MODE, BlockPos.ZERO,
                         com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_POWERED.ordinal(), 14), owner),
                 ActionResultS2CPayload.Result.APPLIED, "Authorized redstone control");
-        helper.assertValueEqual(QFNetworking.processGadgetAction(new GadgetActionPayload(
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(new GadgetActionPayload(
                         absolutePos, GadgetAction.SET_REDSTONE_MODE, BlockPos.ZERO, Integer.MAX_VALUE, 15), owner),
                 ActionResultS2CPayload.Result.INVALID_REQUEST, "Invalid redstone mode");
 
         owner.setPos(absolutePos.getX() + 16.5D, absolutePos.getY() + 0.5D,
                 absolutePos.getZ() + 0.5D);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(valid, owner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(valid, owner),
                 ActionResultS2CPayload.Result.OUT_OF_RANGE,
                 "Out-of-range payload result");
 
         owner.setPos(absolutePos.getX() + 0.5D, absolutePos.getY() + 0.5D,
                 absolutePos.getZ() + 0.5D);
         owner.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(valid, owner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(valid, owner),
                 ActionResultS2CPayload.Result.GADGET_REQUIRED,
                 "Payload without held active gadget result");
         equipActiveGadget(owner);
@@ -74,24 +74,24 @@ public final class QFNetworkingGameTests {
         ServerPlayer stranger = makeFakePlayer(helper, "QFStranger");
         stranger.setPos(owner.position());
         equipActiveGadget(stranger);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(valid, stranger),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(valid, stranger),
                 ActionResultS2CPayload.Result.NOT_ALLOWED,
                 "Unauthorized network mutation result");
 
         DenyInteraction listener = new DenyInteraction(absolutePos);
-        NeoForge.EVENT_BUS.register(listener);
+        MinecraftForge.EVENT_BUS.register(listener);
         try {
-            helper.assertValueEqual(QFNetworking.processGadgetAction(valid, owner),
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(valid, owner),
                     ActionResultS2CPayload.Result.NOT_ALLOWED,
                     "Claim-denied payload result");
         } finally {
-            NeoForge.EVENT_BUS.unregister(listener);
+            MinecraftForge.EVENT_BUS.unregister(listener);
         }
 
         GadgetActionPayload invalidOrdinal = new GadgetActionPayload(
                 absolutePos, GadgetAction.SET_PRIORITY_MODE, BlockPos.ZERO,
                 Integer.MAX_VALUE, 12);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(invalidOrdinal, owner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(invalidOrdinal, owner),
                 ActionResultS2CPayload.Result.INVALID_REQUEST,
                 "Invalid enum ordinal result");
 
@@ -102,14 +102,14 @@ public final class QFNetworkingGameTests {
                 "Stable unlink target fixture could not be linked");
         GadgetActionPayload wrongTarget = new GadgetActionPayload(
                 absolutePos, GadgetAction.UNLINK_SINGLE, targetPos.above(), 0, 13);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(wrongTarget, owner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(wrongTarget, owner),
                 ActionResultS2CPayload.Result.NOT_FOUND,
                 "Forged unlink target result");
         helper.assertTrue(pylon.isLinkedTo(targetPos),
                 "Forged target removed a different connection");
         GadgetActionPayload exactTarget = new GadgetActionPayload(
                 absolutePos, GadgetAction.UNLINK_SINGLE, targetPos, 0, 14);
-        helper.assertValueEqual(QFNetworking.processGadgetAction(exactTarget, owner),
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(exactTarget, owner),
                 ActionResultS2CPayload.Result.APPLIED,
                 "Stable unlink target result");
         helper.assertFalse(pylon.isLinkedTo(targetPos),
@@ -130,7 +130,7 @@ public final class QFNetworkingGameTests {
             helper.assertFalse(result == ActionResultS2CPayload.Result.RATE_LIMITED,
                     "Payload was rate-limited before the configured limit");
         }
-        helper.assertValueEqual(QFNetworking.processGadgetAction(
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, QFNetworking.processGadgetAction(
                         priorityPayload(absolutePos, PriorityMode.EQUAL, 41), owner),
                 ActionResultS2CPayload.Result.RATE_LIMITED,
                 "Forty-first payload result");
@@ -150,8 +150,8 @@ public final class QFNetworkingGameTests {
 
         ServerPlayer owner = fixture.owner();
         ItemStack gadget = owner.getMainHandItem();
-        gadget.set(QFDataComponents.SELECTED_NETWORK.get(), network.getUuid());
-        gadget.set(QFDataComponents.SELECTED_NETWORK_DIMENSION.get(), level.dimension().location().toString());
+        QFDataComponents.SELECTED_NETWORK.set(gadget, network.getUuid());
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.set(gadget, level.dimension().location().toString());
         owner.setPos(fixture.pylon().getBlockPos().getX() + 512.5, 64, fixture.pylon().getBlockPos().getZ() + 512.5);
         var snapshots = new java.util.HashMap<java.util.UUID, NetworkTelemetryPayload>();
         var reading = QFNetworking.selectedNetworkTelemetry(owner, manager, snapshots);
@@ -173,7 +173,7 @@ public final class QFNetworkingGameTests {
         network.setAccessMode(QFNetwork.AccessMode.PUBLIC);
         helper.assertTrue(QFNetworking.selectedNetworkTelemetry(guest, manager, snapshots) != null,
                 "Public network readings must be available to a selected guest");
-        guest.getMainHandItem().set(QFDataComponents.SELECTED_NETWORK_DIMENSION.get(), "minecraft:the_nether");
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.set(guest.getMainHandItem(), "minecraft:the_nether");
         helper.assertTrue(QFNetworking.selectedNetworkTelemetry(guest, manager, snapshots) == null,
                 "A stale dimension selection must not expose matching UUID data");
         manager.removePylon(network.getUuid(), unloaded);
@@ -215,7 +215,7 @@ public final class QFNetworkingGameTests {
 
     private static void equipActiveGadget(ServerPlayer player) {
         ItemStack gadget = new ItemStack(QFItems.QUANTUM_GADGET.get());
-        gadget.set(QFDataComponents.GADGET_ACTIVE.get(), true);
+        QFDataComponents.GADGET_ACTIVE.set(gadget, true);
         player.setItemInHand(InteractionHand.MAIN_HAND, gadget);
     }
 

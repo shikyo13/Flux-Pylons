@@ -3,19 +3,22 @@
   "category": "redstone",
   "key": {
     "C": {
-      "item": "minecraft:ender_pearl"
+      "item": "minecraft:copper_ingot"
     },
     "M": {
       "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
     }
   },
   "pattern": [
-    " M ",
-    "MCM",
+    "CMC",
+    "MRM",
     " M "
   ],
   "result": {
-    "count": 1,
-    "id": "quantumflux:range_upgrade"
-  }
+    "item": "quantumflux:capacity_upgrade"
+  },
+  "show_notification": true
 }

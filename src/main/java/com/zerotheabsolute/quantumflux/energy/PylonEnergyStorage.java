@@ -1,6 +1,6 @@
 package com.zerotheabsolute.quantumflux.energy;
 
-import net.neoforged.neoforge.energy.EnergyStorage;
+import net.minecraftforge.energy.EnergyStorage;
 
 import java.util.function.IntConsumer;
 

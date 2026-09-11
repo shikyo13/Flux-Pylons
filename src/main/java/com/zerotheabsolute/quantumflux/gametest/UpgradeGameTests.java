@@ -17,7 +17,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -27,18 +27,18 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerSynchronizer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.FakePlayerFactory;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.FakePlayerFactory;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.gametest.GameTestHolder;
+import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,18 +56,22 @@ public final class UpgradeGameTests {
         var recipes = helper.getLevel().getRecipeManager();
         for (Item upgrade : upgradeItems()) {
             var id = BuiltInRegistries.ITEM.getKey(upgrade);
-            var recipe = (ShapedRecipe) recipes.byKey(id).orElseThrow().value();
+            var recipe = (ShapedRecipe) recipes.byKey(id).orElseThrow();
             var ingredients = recipe.getIngredients().stream()
                     .map(ingredient -> ingredient.isEmpty() ? ItemStack.EMPTY : ingredient.getItems()[0].copy())
                     .toList();
-            var input = CraftingInput.of(recipe.getWidth(), recipe.getHeight(), ingredients);
+            var input = new TransientCraftingContainer(new net.minecraft.world.inventory.AbstractContainerMenu(null, -1) {
+                @Override public ItemStack quickMoveStack(net.minecraft.world.entity.player.Player player, int slot) { return ItemStack.EMPTY; }
+                @Override public boolean stillValid(net.minecraft.world.entity.player.Player player) { return true; }
+            }, recipe.getWidth(), recipe.getHeight());
+            for (int slot = 0; slot < ingredients.size(); slot++) input.setItem(slot, ingredients.get(slot));
             // Query every loaded crafting recipe: a recipe-book hint can conceal a
             // collision that produces a vanilla compass/clock after JEI transfer.
             var matches = recipes.getRecipesFor(RecipeType.CRAFTING, input, helper.getLevel());
-            helper.assertValueEqual(matches.size(), 1,
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, matches.size(), 1,
                     "Upgrade grid must have one result for " + id + ": "
-                            + matches.stream().map(match -> match.id().toString()).toList());
-            helper.assertTrue(matches.getFirst().value().assemble(input, helper.getLevel().registryAccess()).is(upgrade),
+                            + matches.stream().map(match -> match.getId().toString()).toList());
+            helper.assertTrue(matches.get(0).assemble(input, helper.getLevel().registryAccess()).is(upgrade),
                     "Crafting grid produced the wrong item for " + id);
         }
         helper.succeed();
@@ -88,30 +92,30 @@ public final class UpgradeGameTests {
             menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
             helper.assertTrue(helper.getLevel().getChunkAt(pylon.getBlockPos()).isUnsaved(),
                     "Merged upgrades must mark the chunk for saving");
-            helper.assertValueEqual(pylon.getUpgrades().getStackInSlot(i).getCount(), 4, "Installed upgrade count");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().getStackInSlot(i).getCount(), 4, "Installed upgrade count");
             helper.assertTrue(player.getInventory().getItem(9).isEmpty(), "Upgrade stack remained in player inventory");
         }
-        helper.assertValueEqual(menu.range(), 32, "Four range upgrades");
-        helper.assertValueEqual(menu.maxConnections(), 28, "Four connection upgrades");
-        helper.assertValueEqual(menu.transferLimit(), 30_000, "Four throughput upgrades");
-        helper.assertValueEqual(pylon.getEnergyStorage().getMaxEnergyStored(), 1_600_000,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, menu.range(), 32, "Four range upgrades");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, menu.maxConnections(), 28, "Four connection upgrades");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, menu.transferLimit(), 30_000, "Four throughput upgrades");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getMaxEnergyStored(), 1_600_000,
                 "Buffer capacity must change immediately after merging");
         var receiver = EnergyReceiverFixture.place(helper, PYLON.offset(3, 0, 0));
         helper.assertTrue(pylon.tryLink(receiver.getBlockPos()), "Receiver link");
         pylon.getEnergyStorage().receiveEnergy(100_000, false);
         tick(helper, pylon);
-        helper.assertValueEqual(receiver.getEnergyStorage().getEnergyStored(), 30_000, "Actual upgraded FE delivery");
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 70_000, "Only delivered FE was spent");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, receiver.getEnergyStorage().getEnergyStored(), 30_000, "Actual upgraded FE delivery");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getEnergyStored(), 70_000, "Only delivered FE was spent");
 
-        var saved = pylon.saveWithoutMetadata(helper.getLevel().registryAccess());
+        var saved = pylon.saveWithoutMetadata();
         var restored = new QuantumPylonBlockEntity(pylon.getBlockPos(), pylon.getBlockState());
-        restored.loadWithComponents(saved, helper.getLevel().registryAccess());
+        restored.load(saved);
         for (UpgradeType type : UpgradeType.values()) {
-            helper.assertValueEqual(restored.getUpgrades().level(type), 4, "Saved upgrade level " + type);
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, restored.getUpgrades().level(type), 4, "Saved upgrade level " + type);
         }
-        helper.assertValueEqual(restored.getEffectiveBufferSize(), 1_600_000, "Reloaded upgrade capacity");
-        helper.assertValueEqual(restored.getEnergyStorage().getEnergyStored(), 70_000, "Reloaded stored FE");
-        helper.assertValueEqual(restored.getConnections().size(), 1, "Reloaded links");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, restored.getEffectiveBufferSize(), 1_600_000, "Reloaded upgrade capacity");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, restored.getEnergyStorage().getEnergyStored(), 70_000, "Reloaded stored FE");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, restored.getConnections().size(), 1, "Reloaded links");
         helper.succeed();
     }
 
@@ -124,32 +128,32 @@ public final class UpgradeGameTests {
         pylon.getEnergyStorage().receiveEnergy(1_500_000, false);
         for (ClickType click : new ClickType[]{ClickType.PICKUP, ClickType.QUICK_MOVE, ClickType.SWAP, ClickType.THROW}) {
             menu.clicked(3, click == ClickType.SWAP ? 1 : 0, click, player);
-            helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.BUFFER), 4, "Charged buffer removal via " + click);
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().level(UpgradeType.BUFFER), 4, "Charged buffer removal via " + click);
             helper.assertTrue(menu.getCarried().isEmpty(), "Rejected removal placed an item on the cursor");
             helper.assertTrue(player.getInventory().getItem(1).isEmpty(), "Rejected removal moved an item to the hotbar");
         }
         menu.setCarried(new ItemStack(QFItems.BUFFER_UPGRADE.get()));
         menu.clicked(3, 0, ClickType.PICKUP_ALL, player);
-        helper.assertValueEqual(menu.getCarried().getCount(), 1, "Double click removed a locked buffer");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, menu.getCarried().getCount(), 1, "Double click removed a locked buffer");
         menu.setCarried(ItemStack.EMPTY);
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 1_500_000, "Rejected removal lost stored FE");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getEnergyStored(), 1_500_000, "Rejected removal lost stored FE");
         helper.assertTrue(pylon.getUpgrades().extractItem(3, 4, false).isEmpty(), "Direct handler extraction bypassed the lock");
 
         pylon.getEnergyStorage().consumeEnergy(1_400_000);
         menu.clicked(3, 0, ClickType.QUICK_MOVE, player);
-        helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.BUFFER), 0, "Drained buffer removal");
-        helper.assertValueEqual(countInventory(player, QFItems.BUFFER_UPGRADE.get()), 4, "Recovered buffer items");
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 100_000, "Removal retained stored FE");
-        helper.assertValueEqual(pylon.getEnergyStorage().getMaxEnergyStored(), 100_000, "Capacity after removal");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().level(UpgradeType.BUFFER), 0, "Drained buffer removal");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, countInventory(player, QFItems.BUFFER_UPGRADE.get()), 4, "Recovered buffer items");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getEnergyStored(), 100_000, "Removal retained stored FE");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getMaxEnergyStored(), 100_000, "Capacity after removal");
 
-        var reducedConfiguration = pylon.saveWithoutMetadata(helper.getLevel().registryAccess());
+        var reducedConfiguration = pylon.saveWithoutMetadata();
         reducedConfiguration.putInt("Energy", 900_000);
-        pylon.loadWithComponents(reducedConfiguration, helper.getLevel().registryAccess());
-        helper.assertValueEqual(pylon.getEnergyStorage().getEnergyStored(), 900_000, "Old larger buffer must not lose FE on load");
-        helper.assertValueEqual(pylon.getEnergyStorage().receiveEnergy(1, false), 0, "Excess storage accepted new FE");
+        pylon.load(reducedConfiguration);
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getEnergyStored(), 900_000, "Old larger buffer must not lose FE on load");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().receiveEnergy(1, false), 0, "Excess storage accepted new FE");
         pylon.getEnergyStorage().consumeEnergy(800_001);
-        helper.assertValueEqual(pylon.getEnergyStorage().getMaxEnergyStored(), 100_000, "Drained excess capacity");
-        helper.assertValueEqual(pylon.getEnergyStorage().receiveEnergy(2, false), 1, "Input resumes at the new capacity");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().getMaxEnergyStored(), 100_000, "Drained excess capacity");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getEnergyStorage().receiveEnergy(2, false), 1, "Input resumes at the new capacity");
         helper.succeed();
     }
 
@@ -158,7 +162,7 @@ public final class UpgradeGameTests {
         var pylon = placePylon(helper, PYLON);
         var player = player(helper, pylon);
         var server = menu(player, pylon);
-        var extra = new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());
+        var extra = new FriendlyByteBuf(Unpooled.buffer());
         extra.writeBlockPos(pylon.getBlockPos());
         var client = new PylonUpgradeMenu(1, new Inventory(player), extra);
         extra.release();
@@ -180,11 +184,11 @@ public final class UpgradeGameTests {
         pylon.getUpgrades().insertItem(3, new ItemStack(QFItems.BUFFER_UPGRADE.get(), 4), false);
         pylon.getEnergyStorage().receiveEnergy(1_567_890, false);
         server.broadcastChanges();
-        helper.assertValueEqual(client.bufferLimit(), 1_600_000, "Client capacity above 16 bits");
-        helper.assertValueEqual(client.storedEnergy(), 1_567_890, "Client energy with signed low word");
-        helper.assertValueEqual(client.baseBufferLimit(), 100_000, "Server-configured base capacity");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, client.bufferLimit(), 1_600_000, "Client capacity above 16 bits");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, client.storedEnergy(), 1_567_890, "Client energy with signed low word");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, client.baseBufferLimit(), 100_000, "Server-configured base capacity");
         helper.assertFalse(client.canRemoveBuffers(), "Client buffer lock");
-        helper.assertValueEqual(client.previewValue(UpgradeType.RANGE, 1), 20, "Client next-upgrade preview");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, client.previewValue(UpgradeType.RANGE, 1), 20, "Client next-upgrade preview");
         helper.succeed();
     }
 
@@ -206,21 +210,21 @@ public final class UpgradeGameTests {
         pylon.getUpgrades().extractItem(1, 4, false);
         pylon.getEnergyStorage().receiveEnergy(100_000, false);
         tick(helper, pylon);
-        helper.assertValueEqual(pylon.getConnections().size(), 28, "Downgrade discarded configuration");
-        helper.assertValueEqual(pylon.getConnectionStatus(far.getBlockPos()), ConnectionStatus.OUT_OF_RANGE, "Range explanation");
-        helper.assertValueEqual(pylon.getConnectionStatus(nearby.get(19).getBlockPos()), ConnectionStatus.CONNECTION_LIMIT,
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getConnections().size(), 28, "Downgrade discarded configuration");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getConnectionStatus(far.getBlockPos()), ConnectionStatus.OUT_OF_RANGE, "Range explanation");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getConnectionStatus(nearby.get(19).getBlockPos()), ConnectionStatus.CONNECTION_LIMIT,
                 "Connection limit explanation");
-        helper.assertValueEqual(far.getEnergyStorage().getEnergyStored(), 0, "Delivery outside downgraded range");
-        helper.assertValueEqual(nearby.get(19).getEnergyStorage().getEnergyStored(), 0, "Delivery beyond downgraded connection limit");
-        helper.assertTrue(nearby.getFirst().getEnergyStorage().getEnergyStored() > 0, "Enabled receiver was starved by inactive links");
-        var saved = pylon.saveWithoutMetadata(helper.getLevel().registryAccess());
-        pylon.loadWithComponents(saved, helper.getLevel().registryAccess());
-        helper.assertValueEqual(pylon.getConnections().size(), 28, "Inactive links lost on reload");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, far.getEnergyStorage().getEnergyStored(), 0, "Delivery outside downgraded range");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, nearby.get(19).getEnergyStorage().getEnergyStored(), 0, "Delivery beyond downgraded connection limit");
+        helper.assertTrue(nearby.get(0).getEnergyStorage().getEnergyStored() > 0, "Enabled receiver was starved by inactive links");
+        var saved = pylon.saveWithoutMetadata();
+        pylon.load(saved);
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getConnections().size(), 28, "Inactive links lost on reload");
         pylon.getUpgrades().insertItem(0, new ItemStack(QFItems.RANGE_UPGRADE.get(), 4), false);
         pylon.getUpgrades().insertItem(1, new ItemStack(QFItems.CAPACITY_UPGRADE.get(), 4), false);
         tick(helper, pylon);
         helper.assertTrue(far.getEnergyStorage().getEnergyStored() > 0, "Restored range did not resume delivery");
-        helper.assertTrue(nearby.getLast().getEnergyStorage().getEnergyStored() > 0, "Restored capacity did not resume delivery");
+        helper.assertTrue(nearby.get(nearby.size() - 1).getEnergyStorage().getEnergyStored() > 0, "Restored capacity did not resume delivery");
         helper.setBlock(farRelative, Blocks.AIR);
         helper.succeed();
     }
@@ -242,11 +246,11 @@ public final class UpgradeGameTests {
             for (Item item : upgradeItems()) {
                 int count = drops.stream().filter(entity -> entity.getItem().is(item))
                         .mapToInt(entity -> entity.getItem().getCount()).sum();
-                helper.assertValueEqual(count, 4, "Upgrade drops after breaking " + (top ? "top" : "bottom"));
+                com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, count, 4, "Upgrade drops after breaking " + (top ? "top" : "bottom"));
             }
             int pylons = drops.stream().filter(entity -> entity.getItem().is(QFItems.QUANTUM_PYLON.get()))
                     .mapToInt(entity -> entity.getItem().getCount()).sum();
-            helper.assertValueEqual(pylons, 1, "Pylon drop count");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylons, 1, "Pylon drop count");
         }
         helper.succeed();
     }
@@ -279,11 +283,11 @@ public final class UpgradeGameTests {
             for (Item item : upgradeItems()) {
                 int count = drops.stream().filter(entity -> entity.getItem().is(item))
                         .mapToInt(entity -> entity.getItem().getCount()).sum();
-                helper.assertValueEqual(count, 4, "Explosion duplicated or lost an installed upgrade");
+                com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, count, 4, "Explosion duplicated or lost an installed upgrade");
             }
             int count = drops.stream().filter(entity -> entity.getItem().is(QFItems.QUANTUM_PYLON.get()))
                     .mapToInt(entity -> entity.getItem().getCount()).sum();
-            helper.assertValueEqual(count, 1, "Explosion pylon drop count");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, count, 1, "Explosion pylon drop count");
         }
         helper.succeed();
     }
@@ -303,23 +307,23 @@ public final class UpgradeGameTests {
         helper.assertTrue(menu.stillValid(player), "Member menu access");
         manager.removeMember(network.getUuid(), owner, player.getUUID());
         menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
-        helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Revoked member installed an upgrade");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Revoked member installed an upgrade");
         manager.addMember(network.getUuid(), owner, player.getUUID());
         player.setPos(pylon.getBlockPos().getCenter().add(16, 0, 0));
         menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
-        helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Distant player installed an upgrade");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Distant player installed an upgrade");
         player.setPos(pylon.getBlockPos().getCenter());
         var denied = new DenyInteraction(pylon.getBlockPos());
-        NeoForge.EVENT_BUS.register(denied);
+        MinecraftForge.EVENT_BUS.register(denied);
         try {
             menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
-            helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Claim denial was bypassed");
+            com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().level(UpgradeType.RANGE), 0, "Claim denial was bypassed");
         } finally {
-            NeoForge.EVENT_BUS.unregister(denied);
+            MinecraftForge.EVENT_BUS.unregister(denied);
         }
-        helper.assertValueEqual(player.getInventory().getItem(9).getCount(), 4, "Denied clicks lost player items");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, player.getInventory().getItem(9).getCount(), 4, "Denied clicks lost player items");
         menu.clicked(4, 0, ClickType.QUICK_MOVE, player);
-        helper.assertValueEqual(pylon.getUpgrades().level(UpgradeType.RANGE), 4, "Restored permission did not allow installation");
+        com.zerotheabsolute.quantumflux.gametest.FixtureAssertions.equal(helper, pylon.getUpgrades().level(UpgradeType.RANGE), 4, "Restored permission did not allow installation");
         helper.succeed();
     }
 
@@ -347,7 +351,7 @@ public final class UpgradeGameTests {
         var player = FakePlayerFactory.get(helper.getLevel(), new GameProfile(UUID.randomUUID(), "QFUpgrades"));
         player.setPos(pylon.getBlockPos().getCenter());
         var gadget = new ItemStack(QFItems.QUANTUM_GADGET.get());
-        gadget.set(QFDataComponents.GADGET_ACTIVE.get(), true);
+        QFDataComponents.GADGET_ACTIVE.set(gadget, true);
         player.setItemInHand(InteractionHand.MAIN_HAND, gadget);
         return player;
     }

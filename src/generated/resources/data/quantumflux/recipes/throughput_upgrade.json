@@ -18,7 +18,7 @@
     " M "
   ],
   "result": {
-    "count": 1,
-    "id": "quantumflux:throughput_upgrade"
-  }
+    "item": "quantumflux:throughput_upgrade"
+  },
+  "show_notification": true
 }

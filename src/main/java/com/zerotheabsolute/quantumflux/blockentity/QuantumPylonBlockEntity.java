@@ -29,7 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.minecraftforge.energy.IEnergyStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -42,6 +42,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public class QuantumPylonBlockEntity extends BlockEntity {
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox() {
+        return com.zerotheabsolute.quantumflux.client.ClientScreenBridge.renderBounds(this);
+    }
+
 
     // ── Energy ──
     private PylonEnergyStorage energyStorage;
@@ -437,7 +442,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
     /** Send a sync payload to a specific player (used when opening GUI). */
     public void sendSyncTo(net.minecraft.server.level.ServerPlayer player) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player, buildSyncPayload());
+        com.zerotheabsolute.quantumflux.network.ForgePacketDistributor.sendToPlayer(player, buildSyncPayload());
     }
 
     // ══════════════════════════════════════════
@@ -475,7 +480,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
 
     private void syncToTrackingClients() {
         if (level == null || level.isClientSide) return;
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(
+        com.zerotheabsolute.quantumflux.network.ForgePacketDistributor.sendToPlayersTrackingChunk(
                 (net.minecraft.server.level.ServerLevel) level,
                 new ChunkPos(getBlockPos()),
                 buildSyncPayload());
@@ -489,7 +494,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
                 .map(connection -> new PylonTelemetryPayload.ConnectionReading(
                         connection.getLastTransferred(), describeConnection(connection, availableEnergy)))
                 .toList();
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(
+        com.zerotheabsolute.quantumflux.network.ForgePacketDistributor.sendToPlayersTrackingChunk(
                 (net.minecraft.server.level.ServerLevel) level,
                 new ChunkPos(getBlockPos()),
                 new PylonTelemetryPayload(getBlockPos(), energyStorage.getEnergyStored(),
@@ -548,12 +553,34 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide) syncQueued = true;
     }
 
+    private net.minecraftforge.common.util.LazyOptional<net.minecraftforge.energy.IEnergyStorage> energyCapability =
+            net.minecraftforge.common.util.LazyOptional.of(() -> energyStorage);
+
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    public <T> net.minecraftforge.common.util.LazyOptional<T> getCapability(
+            net.minecraftforge.common.capabilities.Capability<T> capability, @Nullable net.minecraft.core.Direction side) {
+        if (capability == net.minecraftforge.common.capabilities.ForgeCapabilities.ENERGY) return energyCapability.cast();
+        return super.getCapability(capability, side);
+    }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        energyCapability.invalidate();
+    }
+
+    @Override
+    public void reviveCaps() {
+        super.reviveCaps();
+        energyCapability = net.minecraftforge.common.util.LazyOptional.of(() -> energyStorage);
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
         tag.putInt("Energy", energyStorage.getEnergyStored());
         tag.putInt("MaxEnergy", energyStorage.getMaxEnergyStored());
-        tag.put("Upgrades", upgrades.serializeNBT(registries));
+        tag.put("Upgrades", upgrades.serializeNBT());
         tag.putInt("BeamColor", beamColor);
         tag.putString("BeamStyle", beamStyle.name());
         tag.putFloat("GlowIntensity", glowIntensity);
@@ -575,12 +602,14 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    public void load(CompoundTag tag) {
+        super.load(tag);
 
         int storedEnergy = tag.getInt("Energy");
-        upgrades.deserializeNBT(registries, tag.getCompound("Upgrades"));
+        upgrades.deserializeNBT( tag.getCompound("Upgrades"));
         this.energyStorage = createEnergyStorage(getEffectiveBufferSize(), storedEnergy);
+        energyCapability.invalidate();
+        energyCapability = net.minecraftforge.common.util.LazyOptional.of(() -> energyStorage);
 
         this.beamColor = tag.contains("BeamColor")
                 ? tag.getInt("BeamColor") & 0xFFFFFF
@@ -595,7 +624,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
         this.redstoneMode = safeEnum(RedstoneMode.class, tag.getString("RedstoneMode"), RedstoneMode.IGNORE);
         // Numeric NBT conversion also reads the prototype's integer peak.
         double savedPeak = tag.getDouble("PeakThroughput");
-        this.peakThroughput = Double.isFinite(savedPeak) ? Math.clamp(savedPeak, 0, Integer.MAX_VALUE) : 0;
+        this.peakThroughput = Double.isFinite(savedPeak) ? com.zerotheabsolute.quantumflux.util.Numbers.clamp(savedPeak, 0, Integer.MAX_VALUE) : 0;
         this.rotatingIndex = Math.max(0, tag.getInt("RotatingIndex"));
         // Throughput describes this live sampling window, not saved activity.
         this.totalThroughput = 0;
@@ -619,7 +648,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     @Override
-    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         // Vanilla chunk sync only needs the tint source. Rich structure and
         // telemetry use bounded custom payloads after the chunk is known client-side.
@@ -657,7 +686,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     public float getGlowIntensity() { return glowIntensity; }
     public void setGlowIntensity(float intensity) {
         if (!Float.isFinite(intensity)) return;
-        float clamped = Math.clamp(intensity, 0.2f, 2.0f);
+        float clamped = com.zerotheabsolute.quantumflux.util.Numbers.clamp(intensity, 0.2f, 2.0f);
         if (Float.compare(this.glowIntensity, clamped) == 0) return;
         this.glowIntensity = clamped;
         setChanged();
@@ -673,7 +702,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     public float getPulseSpeed() { return pulseSpeed; }
     public void setPulseSpeed(float speed) {
         if (!Float.isFinite(speed)) return;
-        float clamped = Math.clamp(speed, 0.1f, 4.0f);
+        float clamped = com.zerotheabsolute.quantumflux.util.Numbers.clamp(speed, 0.1f, 4.0f);
         if (Float.compare(this.pulseSpeed, clamped) == 0) return;
         this.pulseSpeed = clamped;
         setChanged();
@@ -792,7 +821,7 @@ public class QuantumPylonBlockEntity extends BlockEntity {
     }
 
     private static float finiteClamped(float value, float minimum, float maximum, float fallback) {
-        return Float.isFinite(value) ? Math.clamp(value, minimum, maximum) : fallback;
+        return Float.isFinite(value) ? com.zerotheabsolute.quantumflux.util.Numbers.clamp(value, minimum, maximum) : fallback;
     }
 
     private static <E extends Enum<E>> E safeEnum(Class<E> clazz, String name, E fallback) {

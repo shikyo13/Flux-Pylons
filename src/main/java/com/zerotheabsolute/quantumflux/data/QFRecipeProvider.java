@@ -6,7 +6,8 @@ import com.zerotheabsolute.quantumflux.init.QFItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
-import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.FinishedRecipe;
+import java.util.function.Consumer;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.world.item.Items;
@@ -16,11 +17,11 @@ import java.util.concurrent.CompletableFuture;
 public class QFRecipeProvider extends RecipeProvider {
 
     public QFRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+        super(output);
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput output) {
+    protected void buildRecipes(Consumer<FinishedRecipe> output) {
         // Flux Pylon: I E I / E D E / I R I
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, QFBlocks.QUANTUM_PYLON.get())
                 .pattern("IEI")
@@ -50,7 +51,7 @@ public class QFRecipeProvider extends RecipeProvider {
         upgrade(output, QFItems.BUFFER_UPGRADE.get(), Items.DIAMOND, Items.REDSTONE_BLOCK);
     }
 
-    private void upgrade(RecipeOutput output, net.minecraft.world.level.ItemLike result,
+    private void upgrade(Consumer<FinishedRecipe> output, net.minecraft.world.level.ItemLike result,
                          net.minecraft.world.level.ItemLike frame, net.minecraft.world.level.ItemLike core) {
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, result)
                 .pattern(" M ").pattern("MCM").pattern(" M ")
@@ -58,7 +59,7 @@ public class QFRecipeProvider extends RecipeProvider {
                 .unlockedBy("has_core", has(core)).save(output);
     }
 
-    private void wiredUpgrade(RecipeOutput output, net.minecraft.world.level.ItemLike result,
+    private void wiredUpgrade(Consumer<FinishedRecipe> output, net.minecraft.world.level.ItemLike result,
                               net.minecraft.world.level.ItemLike frame) {
         // Copper contacts distinguish these grids from vanilla's compass and clock.
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, result)

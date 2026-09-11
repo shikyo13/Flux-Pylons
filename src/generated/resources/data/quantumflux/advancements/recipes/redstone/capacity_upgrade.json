@@ -5,7 +5,9 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:redstone_block"
+            "items": [
+              "minecraft:redstone"
+            ]
           }
         ]
       },
@@ -13,20 +15,21 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "quantumflux:buffer_upgrade"
+        "recipe": "quantumflux:capacity_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_core"
+      "has_core",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "quantumflux:buffer_upgrade"
+      "quantumflux:capacity_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

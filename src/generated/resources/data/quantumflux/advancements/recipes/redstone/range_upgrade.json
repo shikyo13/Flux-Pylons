@@ -5,7 +5,9 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:redstone"
+            "items": [
+              "minecraft:ender_pearl"
+            ]
           }
         ]
       },
@@ -13,20 +15,21 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "quantumflux:capacity_upgrade"
+        "recipe": "quantumflux:range_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_the_recipe",
-      "has_core"
+      "has_core",
+      "has_the_recipe"
     ]
   ],
   "rewards": {
     "recipes": [
-      "quantumflux:capacity_upgrade"
+      "quantumflux:range_upgrade"
     ]
-  }
+  },
+  "sends_telemetry_event": false
 }

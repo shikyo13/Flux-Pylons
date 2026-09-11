@@ -20,11 +20,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.minecraftforge.common.ForgeHooks;
+import com.zerotheabsolute.quantumflux.network.ForgePacketDistributor;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -68,26 +65,26 @@ public final class QFNetworking {
 
     private QFNetworking() {}
 
-    public static void register(RegisterPayloadHandlersEvent event) {
-        PayloadRegistrar registrar = event.registrar("3");
+    public static void register() {
+        ForgeNetworkRegistrar registrar = new ForgeNetworkRegistrar();
 
-        registrar.playToClient(PylonSyncPayload.TYPE, PylonSyncPayload.STREAM_CODEC,
+        registrar.playToClient(PylonSyncPayload.class, PylonSyncPayload.STREAM_CODEC,
                 QFNetworking::handlePylonSync);
-        registrar.playToClient(PylonTelemetryPayload.TYPE, PylonTelemetryPayload.STREAM_CODEC,
+        registrar.playToClient(PylonTelemetryPayload.class, PylonTelemetryPayload.STREAM_CODEC,
                 QFNetworking::handlePylonTelemetry);
-        registrar.playToClient(NetworkListSyncS2CPayload.TYPE, NetworkListSyncS2CPayload.STREAM_CODEC,
+        registrar.playToClient(NetworkListSyncS2CPayload.class, NetworkListSyncS2CPayload.STREAM_CODEC,
                 QFNetworking::handleNetworkListSync);
-        registrar.playToClient(NetworkTelemetryPayload.TYPE, NetworkTelemetryPayload.STREAM_CODEC,
+        registrar.playToClient(NetworkTelemetryPayload.class, NetworkTelemetryPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() -> ClientPayloadBridge.handle(payload)));
-        registrar.playToClient(ActionResultS2CPayload.TYPE, ActionResultS2CPayload.STREAM_CODEC,
+        registrar.playToClient(ActionResultS2CPayload.class, ActionResultS2CPayload.STREAM_CODEC,
                 QFNetworking::handleActionResult);
-        registrar.playToClient(OpenPylonPayload.TYPE, OpenPylonPayload.STREAM_CODEC,
+        registrar.playToClient(OpenPylonPayload.class, OpenPylonPayload.STREAM_CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.zerotheabsolute.quantumflux.client.ClientScreenBridge.openPylonScreen(payload.pos())));
 
-        registrar.playToServer(GadgetActionPayload.TYPE, GadgetActionPayload.STREAM_CODEC,
+        registrar.playToServer(GadgetActionPayload.class, GadgetActionPayload.STREAM_CODEC,
                 QFNetworking::handleGadgetAction);
-        registrar.playToServer(NetworkActionC2SPayload.TYPE, NetworkActionC2SPayload.STREAM_CODEC,
+        registrar.playToServer(NetworkActionC2SPayload.class, NetworkActionC2SPayload.STREAM_CODEC,
                 QFNetworking::handleNetworkAction);
 
         // LinkActionPayload was never used by the client. It is intentionally not
@@ -95,23 +92,23 @@ public final class QFNetworking {
         // arbitrary BlockPos mutation to forged packets.
     }
 
-    private static void handlePylonSync(PylonSyncPayload payload, IPayloadContext ctx) {
+    private static void handlePylonSync(PylonSyncPayload payload, ForgePayloadContext ctx) {
         ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
     }
 
-    private static void handlePylonTelemetry(PylonTelemetryPayload payload, IPayloadContext ctx) {
+    private static void handlePylonTelemetry(PylonTelemetryPayload payload, ForgePayloadContext ctx) {
         ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
     }
 
-    private static void handleNetworkListSync(NetworkListSyncS2CPayload payload, IPayloadContext ctx) {
+    private static void handleNetworkListSync(NetworkListSyncS2CPayload payload, ForgePayloadContext ctx) {
         ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
     }
 
-    private static void handleActionResult(ActionResultS2CPayload payload, IPayloadContext ctx) {
+    private static void handleActionResult(ActionResultS2CPayload payload, ForgePayloadContext ctx) {
         ctx.enqueueWork(() -> ClientPayloadBridge.handle(payload));
     }
 
-    private static void handleGadgetAction(GadgetActionPayload payload, IPayloadContext ctx) {
+    private static void handleGadgetAction(GadgetActionPayload payload, ForgePayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             sendActionResult(player, payload.requestId(), processGadgetAction(payload, player));
@@ -157,7 +154,7 @@ public final class QFNetworking {
                 yield ActionResultS2CPayload.Result.APPLIED;
             }
             case OPEN_UPGRADES -> {
-                player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                net.minecraftforge.network.NetworkHooks.openScreen(player, new net.minecraft.world.SimpleMenuProvider(
                         (id, inventory, ignored) -> new com.zerotheabsolute.quantumflux.menu.PylonUpgradeMenu(id, inventory, pylon),
                         Component.translatable("screen.quantumflux.upgrades.title")), pylon.getBlockPos());
                 yield ActionResultS2CPayload.Result.APPLIED;
@@ -183,10 +180,10 @@ public final class QFNetworking {
         if (!canConfigurePylonNow(player, pylon)) return;
         sendNetworkListToPlayer(player, QuantumFluxNetworkManager.get(player.serverLevel()));
         pylon.sendSyncTo(player);
-        PacketDistributor.sendToPlayer(player, new OpenPylonPayload(pylon.getBlockPos()));
+        ForgePacketDistributor.sendToPlayer(player, new OpenPylonPayload(pylon.getBlockPos()));
     }
 
-    private static void handleNetworkAction(NetworkActionC2SPayload payload, IPayloadContext ctx) {
+    private static void handleNetworkAction(NetworkActionC2SPayload payload, ForgePayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             if (!isEligibleSender(player)) {
@@ -408,8 +405,8 @@ public final class QFNetworking {
         QFNetwork network = manager.getNetwork(payload.networkId());
         if (network == null) return ActionResultS2CPayload.Result.NOT_FOUND;
         forEachLoadedPylon(level, network, pylon -> pylon.setBeamColor(payload.color()));
-        if (payload.networkId().equals(gadget.get(QFDataComponents.SELECTED_NETWORK.get()))) {
-            gadget.set(QFDataComponents.GADGET_COLOR.get(), payload.color());
+        if (payload.networkId().equals(QFDataComponents.SELECTED_NETWORK.get(gadget))) {
+            QFDataComponents.GADGET_COLOR.set(gadget, payload.color());
             player.inventoryMenu.broadcastChanges();
         }
         broadcastNetworkLists(level, manager);
@@ -584,12 +581,12 @@ public final class QFNetworking {
 
         InteractionHand hand = isActiveGadget(player.getMainHandItem())
                 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-        var permissionEvent = CommonHooks.onRightClickBlock(
+        var permissionEvent = ForgeHooks.onRightClickBlock(
                 player, hand, pos,
                 new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
         return permissionEvent.isCanceled()
-                || permissionEvent.getUseBlock().isFalse()
-                || permissionEvent.getUseItem().isFalse()
+                || permissionEvent.getUseBlock() == net.minecraftforge.eventbus.api.Event.Result.DENY
+                || permissionEvent.getUseItem() == net.minecraftforge.eventbus.api.Event.Result.DENY
                 ? ActionResultS2CPayload.Result.NOT_ALLOWED
                 : null;
     }
@@ -609,7 +606,7 @@ public final class QFNetworking {
 
     private static boolean isActiveGadget(ItemStack stack) {
         return stack.getItem() instanceof QuantumGadgetItem
-                && Boolean.TRUE.equals(stack.get(QFDataComponents.GADGET_ACTIVE.get()));
+                && Boolean.TRUE.equals(QFDataComponents.GADGET_ACTIVE.get(stack));
     }
 
     private static boolean isValidNetworkId(UUID networkId) {
@@ -629,10 +626,10 @@ public final class QFNetworking {
     }
 
     private static void setGadgetNetwork(ServerPlayer player, ItemStack gadget, QFNetwork network) {
-        gadget.set(QFDataComponents.SELECTED_NETWORK.get(), network.getUuid());
-        gadget.set(QFDataComponents.SELECTED_NETWORK_DIMENSION.get(),
+        QFDataComponents.SELECTED_NETWORK.set(gadget, network.getUuid());
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.set(gadget,
                 player.serverLevel().dimension().location().toString());
-        gadget.set(QFDataComponents.GADGET_COLOR.get(), network.getColor());
+        QFDataComponents.GADGET_COLOR.set(gadget, network.getColor());
         player.inventoryMenu.broadcastChanges();
     }
 
@@ -708,7 +705,7 @@ public final class QFNetworking {
     private static void sendActionResult(ServerPlayer player, int requestId,
                                          ActionResultS2CPayload.Result result) {
         if (requestId <= 0) return;
-        PacketDistributor.sendToPlayer(player, new ActionResultS2CPayload(requestId, result));
+        ForgePacketDistributor.sendToPlayer(player, new ActionResultS2CPayload(requestId, result));
     }
 
     /** Build and send the current dimension's listable networks to one player. */
@@ -736,7 +733,7 @@ public final class QFNetworking {
                 }
             }
             int energyPercent = totalCapacity > 0L
-                    ? (int) Math.clamp(totalEnergy * 100L / totalCapacity, 0L, 100L)
+                    ? (int) com.zerotheabsolute.quantumflux.util.Numbers.clamp(totalEnergy * 100L / totalCapacity, 0L, 100L)
                     : 0;
 
             boolean owner = network.isOwner(player.getUUID());
@@ -761,7 +758,7 @@ public final class QFNetworking {
                     network.getBeamStyle().ordinal(), network.isBeamsVisible(), members));
         }
 
-        PacketDistributor.sendToPlayer(player, new NetworkListSyncS2CPayload(summaries));
+        ForgePacketDistributor.sendToPlayer(player, new NetworkListSyncS2CPayload(summaries));
         sendSelectedNetworkTelemetry(player, manager, new HashMap<>());
     }
 
@@ -805,7 +802,7 @@ public final class QFNetworking {
     private static void sendSelectedNetworkTelemetry(ServerPlayer player, QuantumFluxNetworkManager manager,
                                                       Map<UUID, NetworkTelemetryPayload> snapshots) {
         NetworkTelemetryPayload payload = selectedNetworkTelemetry(player, manager, snapshots);
-        if (payload != null) PacketDistributor.sendToPlayer(player, payload);
+        if (payload != null) ForgePacketDistributor.sendToPlayer(player, payload);
     }
 
     @org.jetbrains.annotations.Nullable
@@ -813,8 +810,8 @@ public final class QFNetworking {
                                                               Map<UUID, NetworkTelemetryPayload> snapshots) {
         ItemStack gadget = getActiveHeldGadget(player);
         if (gadget.isEmpty()) return null;
-        UUID selected = gadget.get(QFDataComponents.SELECTED_NETWORK.get());
-        String dimension = gadget.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
+        UUID selected = QFDataComponents.SELECTED_NETWORK.get(gadget);
+        String dimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(gadget);
         if (selected == null || !player.level().dimension().location().toString().equals(dimension)) return null;
         QFNetwork network = manager.getNetwork(selected);
         if (network == null || !network.canAccess(player.getUUID())) return null;
@@ -839,22 +836,22 @@ public final class QFNetworking {
                                                     QuantumFluxNetworkManager manager,
                                                     String currentDimension) {
         if (!(stack.getItem() instanceof QuantumGadgetItem)) return false;
-        UUID selected = stack.get(QFDataComponents.SELECTED_NETWORK.get());
+        UUID selected = QFDataComponents.SELECTED_NETWORK.get(stack);
         if (selected == null) return false;
-        String selectedDimension = stack.get(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
+        String selectedDimension = QFDataComponents.SELECTED_NETWORK_DIMENSION.get(stack);
         QFNetwork network = manager.getNetwork(selected);
         if (currentDimension.equals(selectedDimension)
                 && network != null && network.canAccess(player.getUUID())) {
-            Integer gadgetColor = stack.get(QFDataComponents.GADGET_COLOR.get());
+            Integer gadgetColor = QFDataComponents.GADGET_COLOR.get(stack);
             if (gadgetColor == null || gadgetColor.intValue() != network.getColor()) {
-                stack.set(QFDataComponents.GADGET_COLOR.get(), network.getColor());
+                QFDataComponents.GADGET_COLOR.set(stack, network.getColor());
                 return true;
             }
             return false;
         }
-        stack.remove(QFDataComponents.SELECTED_NETWORK.get());
-        stack.remove(QFDataComponents.SELECTED_NETWORK_DIMENSION.get());
-        stack.set(QFDataComponents.GADGET_COLOR.get(), QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
+        QFDataComponents.SELECTED_NETWORK.remove(stack);
+        QFDataComponents.SELECTED_NETWORK_DIMENSION.remove(stack);
+        QFDataComponents.GADGET_COLOR.set(stack, QFConfig.DEFAULT_BEAM_COLOR.get() & 0xFFFFFF);
         return true;
     }
 

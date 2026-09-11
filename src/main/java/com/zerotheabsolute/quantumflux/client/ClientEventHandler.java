@@ -22,14 +22,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
-import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import net.neoforged.neoforge.client.event.RenderFrameEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.event.TickEvent;
+
 import org.joml.Vector3f;
 
 import java.util.HashMap;
@@ -52,8 +52,10 @@ public final class ClientEventHandler {
         }
 
         @SubscribeEvent
-        public static void onClientSetup(net.neoforged.fml.event.lifecycle.FMLClientSetupEvent event) {
+        public static void onClientSetup(net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
+                ClientScreenBridge.installRenderBounds(PylonBlockEntityRenderer::renderBounds);
+                net.minecraft.client.gui.screens.MenuScreens.register(com.zerotheabsolute.quantumflux.init.QFMenus.PYLON_UPGRADES.get(), com.zerotheabsolute.quantumflux.client.screen.PylonUpgradeScreen::new);
                 com.zerotheabsolute.quantumflux.network.ClientPayloadBridge.install(
                         ClientPacketHandlers::handlePylonSync,
                         ClientPacketHandlers::handlePylonTelemetry,
@@ -65,19 +67,13 @@ public final class ClientEventHandler {
 
                 net.minecraft.client.renderer.item.ItemProperties.register(
                         QFItems.QUANTUM_GADGET.get(),
-                        net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "active"),
+                        new net.minecraft.resources.ResourceLocation(QuantumFlux.MODID, "active"),
                         (stack, level, entity, seed) ->
-                                Boolean.TRUE.equals(stack.get(
-                                        com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get()))
+                                Boolean.TRUE.equals(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get(stack))
                                         ? 1.0f : 0.0f);
             });
         }
 
-        @SubscribeEvent
-        public static void registerMenuScreens(net.neoforged.neoforge.client.event.RegisterMenuScreensEvent event) {
-            event.register(com.zerotheabsolute.quantumflux.init.QFMenus.PYLON_UPGRADES.get(),
-                    com.zerotheabsolute.quantumflux.client.screen.PylonUpgradeScreen::new);
-        }
 
         @SubscribeEvent
         public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
@@ -97,14 +93,12 @@ public final class ClientEventHandler {
         @SubscribeEvent
         public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
             event.register((stack, tintIndex) -> {
-                boolean active = Boolean.TRUE.equals(stack.get(
-                        com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get()));
+                boolean active = Boolean.TRUE.equals(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get(stack));
                 if (tintIndex == 1) return active ? 0xFF65E375 : 0xFF253E2D;
                 if (tintIndex == 2) return active ? 0xFF512626 : 0xFFE25543;
                 if (tintIndex != 0) return -1;
                 if (!active) return 0xFF48565B;
-                Integer color = stack.get(
-                        com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_COLOR.get());
+                Integer color = com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_COLOR.get(stack);
                 // Minecraft 1.21 item colors include alpha; a plain RGB value is invisible.
                 return 0xFF000000 | (color == null ? QFConfig.DEFAULT_BEAM_COLOR.get() : color) & 0xFFFFFF;
             }, QFItems.QUANTUM_GADGET.get());
@@ -115,7 +109,7 @@ public final class ClientEventHandler {
 
     // ── Client tick + HUD overlay (GAME bus) ──
 
-    @EventBusSubscriber(modid = QuantumFlux.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = QuantumFlux.MODID, bus = EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
     public static class GameBusEvents {
 
         private static final Map<BlockPos, PylonHumSoundInstance> activeHums = new HashMap<>();
@@ -129,13 +123,15 @@ public final class ClientEventHandler {
         private static final double HUM_STOP_DISTANCE_SQR = 8.0 * 8.0;
 
         @SubscribeEvent
-        public static void onRenderFrame(RenderFrameEvent.Pre event) {
+        public static void onRenderFrame(TickEvent.RenderTickEvent event) {
+            if (event.phase != TickEvent.Phase.START) return;
             BeamRenderFrameBudget.beginFrame();
         }
 
         @SubscribeEvent
-        public static void onClientLevelTick(LevelTickEvent.Post event) {
-            if (!(event.getLevel() instanceof net.minecraft.client.multiplayer.ClientLevel clientLevel)) return;
+        public static void onClientLevelTick(TickEvent.LevelTickEvent event) {
+            if (event.phase != TickEvent.Phase.END) return;
+            if (!(event.level instanceof net.minecraft.client.multiplayer.ClientLevel clientLevel)) return;
             if (clientLevel != Minecraft.getInstance().level) return;
 
             long gameTime = clientLevel.getGameTime();
@@ -320,7 +316,7 @@ public final class ClientEventHandler {
         }
 
         @SubscribeEvent
-        public static void onLevelUnload(net.neoforged.neoforge.event.level.LevelEvent.Unload event) {
+        public static void onLevelUnload(net.minecraftforge.event.level.LevelEvent.Unload event) {
             if (event.getLevel().isClientSide()) {
                 stopAllHums();
                 ClientDataCache.clear();
@@ -348,7 +344,7 @@ public final class ClientEventHandler {
             }
 
             // Skip overlay when gadget is off
-            if (!Boolean.TRUE.equals(held.get(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get()))) return;
+            if (!Boolean.TRUE.equals(com.zerotheabsolute.quantumflux.init.QFDataComponents.GADGET_ACTIVE.get(held))) return;
 
             if (!QFConfig.SHOW_GADGET_OVERLAY.get()) return;
 
@@ -383,7 +379,7 @@ public final class ClientEventHandler {
                 }
             }
 
-            var linkData = held.get(com.zerotheabsolute.quantumflux.init.QFDataComponents.LINKING_DATA.get());
+            var linkData = com.zerotheabsolute.quantumflux.init.QFDataComponents.LINKING_DATA.get(held);
             if (linkData != null && linkData.active()) {
                 Component linkMessage = Component.translatable("overlay.quantumflux.linking",
                         linkData.pylonPos().getX(), linkData.pylonPos().getY(), linkData.pylonPos().getZ());

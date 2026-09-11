@@ -32,9 +32,9 @@ public final class NetworkCodecTest {
         FriendlyByteBuf networkBuffer = new FriendlyByteBuf(Unpooled.buffer());
         NetworkListSyncS2CPayload.STREAM_CODEC.encode(networkBuffer, original);
         NetworkListSyncS2CPayload decoded = NetworkListSyncS2CPayload.STREAM_CODEC.decode(networkBuffer);
-        var summary = decoded.networks().getFirst();
+        var summary = decoded.networks().get(0);
         assert summary.uuid().equals(networkId);
-        assert summary.members().getFirst().uuid().equals(memberId);
+        assert summary.members().get(0).uuid().equals(memberId);
         assert summary.beamStyle() == 1;
         assert !summary.beamsVisible();
 
@@ -113,8 +113,8 @@ public final class NetworkCodecTest {
         var decodedPylon = PylonSyncPayload.STREAM_CODEC.decode(pylonBuffer);
         assert decodedPylon.throughput() == 0.05 && decodedPylon.peakThroughput() == 2.15;
         assert decodedPylon.redstoneMode() == com.zerotheabsolute.quantumflux.util.RedstoneMode.WHEN_UNPOWERED;
-        assert decodedPylon.connections().getFirst().lastTransferred() == 0.05;
-        assert decodedPylon.connections().getFirst().status() == ConnectionStatus.TRANSFERRING;
+        assert decodedPylon.connections().get(0).lastTransferred() == 0.05;
+        assert decodedPylon.connections().get(0).status() == ConnectionStatus.TRANSFERRING;
         assert PylonReadout.formatRate(decodedPylon.throughput()).equals("0.05")
                 : "A single FE in 20 ticks must display 0.05 FE/t";
         ClientDataCache.receive(decodedPylon, 1L);

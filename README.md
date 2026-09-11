@@ -32,19 +32,19 @@ The [wiki](https://github.com/shikyo13/Flux-Pylons/tree/main/docs/wiki) covers s
 
 ## Compatibility
 
-The current build targets Minecraft **1.21.1**, **NeoForge 21.1.206 or later in the 21.1 series**, and **Java 21**. Install it on both the server and clients. An FE source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
+The current build targets Minecraft **1.20.1**, **Forge 47.4.10 or later in the 47 series**, and **Java 17**. Install it on both the server and clients. An FE source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
 
 Use the file's version and loader tags when downloading. See the [roadmap](ROADMAP.md) for planned ports.
 
 ## Build
 
-Use JDK 21 and the included Gradle wrapper:
+Use JDK 17 and the included Gradle wrapper:
 
 ```sh
 ./gradlew assemble
 ```
 
-The JAR is written to `build/libs/`. Source in `main` contains the 1.2.0 guide update; the download page identifies released files.
+The JAR is written to `build/libs/`. This branch contains the 1.20.1 Forge port; the download page identifies released files.
 
 For the full build and asset verification, install Python 3.13.3, `requirements-assets.txt`, and FFmpeg 8.0.1 with libvorbis. The [build workflow](.github/workflows/build.yml) pins the Linux FFmpeg build used for byte-identical audio:
 

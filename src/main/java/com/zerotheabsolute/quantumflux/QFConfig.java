@@ -1,22 +1,22 @@
 package com.zerotheabsolute.quantumflux;
 
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
 
 public final class QFConfig {
 
     // ── Server Config ──
-    public static final ModConfigSpec SERVER_SPEC;
-    public static final ModConfigSpec.IntValue PYLON_BUFFER_SIZE;
-    public static final ModConfigSpec.IntValue MAX_TRANSFER_PER_TICK;
-    public static final ModConfigSpec.IntValue MAX_CONNECTIONS;
-    public static final ModConfigSpec.IntValue DEFAULT_RANGE;
-    public static final ModConfigSpec.IntValue TICK_INTERVAL;
-    public static final ModConfigSpec.ConfigValue<String> DEFAULT_PRIORITY_MODE;
-    public static final ModConfigSpec.ConfigValue<String> DEFAULT_BEAM_STYLE;
-    public static final ModConfigSpec.IntValue DEFAULT_BEAM_COLOR;
+    public static final ForgeConfigSpec SERVER_SPEC;
+    public static final ForgeConfigSpec.IntValue PYLON_BUFFER_SIZE;
+    public static final ForgeConfigSpec.IntValue MAX_TRANSFER_PER_TICK;
+    public static final ForgeConfigSpec.IntValue MAX_CONNECTIONS;
+    public static final ForgeConfigSpec.IntValue DEFAULT_RANGE;
+    public static final ForgeConfigSpec.IntValue TICK_INTERVAL;
+    public static final ForgeConfigSpec.ConfigValue<String> DEFAULT_PRIORITY_MODE;
+    public static final ForgeConfigSpec.ConfigValue<String> DEFAULT_BEAM_STYLE;
+    public static final ForgeConfigSpec.IntValue DEFAULT_BEAM_COLOR;
 
     static {
-        ModConfigSpec.Builder server = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder server = new ForgeConfigSpec.Builder();
 
         server.comment("Flux Pylon settings").push("pylon");
         PYLON_BUFFER_SIZE = server.comment("Internal energy buffer size (FE)")
@@ -42,17 +42,17 @@ public final class QFConfig {
     }
 
     // ── Client Config ──
-    public static final ModConfigSpec CLIENT_SPEC;
-    public static final ModConfigSpec.BooleanValue RENDER_BEAMS_THROUGH_BLOCKS;
-    public static final ModConfigSpec.IntValue MAX_BEAM_RENDER_DISTANCE;
-    public static final ModConfigSpec.ConfigValue<String> BEAM_RENDER_QUALITY;
-    public static final ModConfigSpec.IntValue MAX_BEAM_VERTICES_PER_FRAME;
-    public static final ModConfigSpec.IntValue MAX_PARTICLES_PER_PYLON;
-    public static final ModConfigSpec.BooleanValue SHOW_GADGET_OVERLAY;
-    public static final ModConfigSpec.DoubleValue PYLON_HUM_VOLUME;
+    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ForgeConfigSpec.BooleanValue RENDER_BEAMS_THROUGH_BLOCKS;
+    public static final ForgeConfigSpec.IntValue MAX_BEAM_RENDER_DISTANCE;
+    public static final ForgeConfigSpec.ConfigValue<String> BEAM_RENDER_QUALITY;
+    public static final ForgeConfigSpec.IntValue MAX_BEAM_VERTICES_PER_FRAME;
+    public static final ForgeConfigSpec.IntValue MAX_PARTICLES_PER_PYLON;
+    public static final ForgeConfigSpec.BooleanValue SHOW_GADGET_OVERLAY;
+    public static final ForgeConfigSpec.DoubleValue PYLON_HUM_VOLUME;
 
     static {
-        ModConfigSpec.Builder client = new ModConfigSpec.Builder();
+        ForgeConfigSpec.Builder client = new ForgeConfigSpec.Builder();
 
         client.comment("Beam rendering settings").push("beams");
         RENDER_BEAMS_THROUGH_BLOCKS = client.comment("Whether beams render through solid blocks")

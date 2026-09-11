@@ -3,97 +3,73 @@ package com.zerotheabsolute.quantumflux.init;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.zerotheabsolute.quantumflux.QuantumFlux;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.DeferredRegister;
-
+import net.minecraft.world.item.ItemStack;
 import java.util.UUID;
 
+/** Gadget state stored in vanilla item NBT on Minecraft 1.20.1. */
 public final class QFDataComponents {
-
     public static final int MAX_DIMENSION_ID_LENGTH = 128;
-    private static final Codec<String> DIMENSION_ID_CODEC = Codec.STRING.validate(value -> {
+    private static final String ROOT = "quantumflux";
+    private static final Codec<String> DIMENSION_ID_CODEC = Codec.STRING.comapFlatMap(value -> {
         if (value.isEmpty()) return DataResult.success(value);
-        if (value.length() > MAX_DIMENSION_ID_LENGTH) {
-            return DataResult.error(() -> "Dimension identifier exceeds "
-                    + MAX_DIMENSION_ID_LENGTH + " characters");
+        return value.length() <= MAX_DIMENSION_ID_LENGTH && ResourceLocation.tryParse(value) != null
+                ? DataResult.success(value) : DataResult.error(() -> "Invalid dimension identifier");
+    }, value -> value);
+
+    // DFU in 1.20.1 silently ignores invalid values in optionalFieldOf. Keep the
+    // legacy missing-dimension default while rejecting an invalid supplied value.
+    private static final com.mojang.serialization.MapCodec<String> OPTIONAL_DIMENSION = new com.mojang.serialization.MapCodec<>() {
+        @Override public <T> DataResult<String> decode(com.mojang.serialization.DynamicOps<T> ops,
+                com.mojang.serialization.MapLike<T> input) {
+            T value = input.get("dimension");
+            return value == null ? DataResult.success("") : DIMENSION_ID_CODEC.parse(ops, value);
         }
-        return ResourceLocation.tryParse(value) != null
-                ? DataResult.success(value)
-                : DataResult.error(() -> "Invalid dimension identifier: " + value);
-    });
+        @Override public <T> com.mojang.serialization.RecordBuilder<T> encode(String value,
+                com.mojang.serialization.DynamicOps<T> ops, com.mojang.serialization.RecordBuilder<T> prefix) {
+            return value.isEmpty() ? prefix : prefix.add("dimension", DIMENSION_ID_CODEC.encodeStart(ops, value));
+        }
+        @Override public <T> java.util.stream.Stream<T> keys(com.mojang.serialization.DynamicOps<T> ops) {
+            return java.util.stream.Stream.of(ops.createString("dimension"));
+        }
+    };
 
-    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS =
-            DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, QuantumFlux.MODID);
-
-    // ── LinkingData record ──
     public record LinkingData(String dimension, BlockPos pylonPos, boolean active) {
-
-        public static final Codec<LinkingData> CODEC = RecordCodecBuilder.create(instance ->
-                instance.group(
-                        DIMENSION_ID_CODEC.optionalFieldOf("dimension", "").forGetter(LinkingData::dimension),
-                        BlockPos.CODEC.fieldOf("pylon_pos").forGetter(LinkingData::pylonPos),
-                        Codec.BOOL.fieldOf("active").forGetter(LinkingData::active)
-                ).apply(instance, LinkingData::new));
-
-        public static final StreamCodec<FriendlyByteBuf, LinkingData> STREAM_CODEC = StreamCodec.of(
-                (buf, data) -> {
-                    buf.writeUtf(data.dimension(), MAX_DIMENSION_ID_LENGTH);
-                    buf.writeBlockPos(data.pylonPos());
-                    buf.writeBoolean(data.active());
-                },
-                buf -> new LinkingData(buf.readUtf(MAX_DIMENSION_ID_LENGTH), buf.readBlockPos(), buf.readBoolean())
-        );
+        public static final Codec<LinkingData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                OPTIONAL_DIMENSION.forGetter(LinkingData::dimension),
+                BlockPos.CODEC.fieldOf("pylon_pos").forGetter(LinkingData::pylonPos),
+                Codec.BOOL.fieldOf("active").forGetter(LinkingData::active)
+        ).apply(instance, LinkingData::new));
     }
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<LinkingData>> LINKING_DATA =
-            DATA_COMPONENTS.register("linking_data", () ->
-                    DataComponentType.<LinkingData>builder()
-                            .persistent(LinkingData.CODEC)
-                            .networkSynchronized(LinkingData.STREAM_CODEC)
-                            .build());
+    public static final DataKey<LinkingData> LINKING_DATA = new DataKey<>("linking_data", LinkingData.CODEC);
+    public static final DataKey<Integer> GADGET_COLOR = new DataKey<>("gadget_color", Codec.INT);
+    public static final DataKey<Boolean> GADGET_ACTIVE = new DataKey<>("gadget_active", Codec.BOOL);
+    public static final DataKey<UUID> SELECTED_NETWORK = new DataKey<>("selected_network", UUIDUtil.CODEC);
+    public static final DataKey<String> SELECTED_NETWORK_DIMENSION = new DataKey<>("selected_network_dimension", DIMENSION_ID_CODEC);
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> GADGET_COLOR =
-            DATA_COMPONENTS.register("gadget_color", () ->
-                    DataComponentType.<Integer>builder()
-                            .persistent(Codec.INT)
-                            .networkSynchronized(StreamCodec.of(
-                                    FriendlyByteBuf::writeInt, FriendlyByteBuf::readInt))
-                            .build());
-
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> GADGET_ACTIVE =
-            DATA_COMPONENTS.register("gadget_active", () ->
-                    DataComponentType.<Boolean>builder()
-                            .persistent(Codec.BOOL)
-                            .networkSynchronized(StreamCodec.of(
-                                    FriendlyByteBuf::writeBoolean, FriendlyByteBuf::readBoolean))
-                            .build());
-
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> SELECTED_NETWORK =
-            DATA_COMPONENTS.register("selected_network", () ->
-                    DataComponentType.<UUID>builder()
-                            .persistent(UUIDUtil.CODEC)
-                            .networkSynchronized(StreamCodec.of(
-                                    (FriendlyByteBuf buf, UUID uuid) -> buf.writeUUID(uuid),
-                                    (FriendlyByteBuf buf) -> buf.readUUID()))
-                            .build());
-
-    /** Dimension in which SELECTED_NETWORK is valid. Kept separate for compatibility with existing UUID data. */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<String>> SELECTED_NETWORK_DIMENSION =
-            DATA_COMPONENTS.register("selected_network_dimension", () ->
-                    DataComponentType.<String>builder()
-                            .persistent(DIMENSION_ID_CODEC)
-                            .networkSynchronized(StreamCodec.of(
-                                    (buf, value) -> buf.writeUtf(value, MAX_DIMENSION_ID_LENGTH),
-                                    buf -> buf.readUtf(MAX_DIMENSION_ID_LENGTH)))
-                            .build());
-
+    public record DataKey<T>(String name, Codec<T> codec) {
+        public T get(ItemStack stack) {
+            CompoundTag tag = stack.getTagElement(ROOT);
+            if (tag == null || !tag.contains(name)) return null;
+            return codec.parse(NbtOps.INSTANCE, tag.get(name)).result().orElse(null);
+        }
+        public void set(ItemStack stack, T value) {
+            if (value == null) { remove(stack); return; }
+            var encoded = codec.encodeStart(NbtOps.INSTANCE, value).result()
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid gadget state: " + name));
+            stack.getOrCreateTagElement(ROOT).put(name, encoded);
+        }
+        public void remove(ItemStack stack) {
+            CompoundTag tag = stack.getTagElement(ROOT);
+            if (tag == null) return;
+            tag.remove(name);
+            if (tag.isEmpty()) stack.removeTagKey(ROOT);
+        }
+    }
     private QFDataComponents() {}
 }

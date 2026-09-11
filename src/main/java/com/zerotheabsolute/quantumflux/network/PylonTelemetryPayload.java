@@ -5,8 +5,8 @@ import com.zerotheabsolute.quantumflux.util.ConnectionStatus;
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import com.zerotheabsolute.quantumflux.network.PacketCodec;
+import com.zerotheabsolute.quantumflux.network.QFPayload;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -22,14 +22,14 @@ public record PylonTelemetryPayload(
         long availableEnergy,
         boolean outputEnabled,
         List<ConnectionReading> connections
-) implements CustomPacketPayload {
+) implements QFPayload {
 
     public record ConnectionReading(double transferred, ConnectionStatus status) {}
 
     public static final Type<PylonTelemetryPayload> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(QuantumFlux.MODID, "pylon_telemetry"));
-    public static final StreamCodec<FriendlyByteBuf, PylonTelemetryPayload> STREAM_CODEC =
-            StreamCodec.of(PylonTelemetryPayload::write, PylonTelemetryPayload::read);
+            new ResourceLocation(QuantumFlux.MODID, "pylon_telemetry"));
+    public static final PacketCodec<FriendlyByteBuf, PylonTelemetryPayload> STREAM_CODEC =
+            PacketCodec.of(PylonTelemetryPayload::write, PylonTelemetryPayload::read);
 
     private static void write(FriendlyByteBuf buf, PylonTelemetryPayload payload) {
         buf.writeBlockPos(payload.pos);
@@ -77,7 +77,7 @@ public record PylonTelemetryPayload(
     }
 
     @Override
-    public Type<? extends CustomPacketPayload> type() {
+    public Type<? extends QFPayload> type() {
         return TYPE;
     }
 }
