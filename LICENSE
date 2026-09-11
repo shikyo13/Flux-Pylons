@@ -1,0 +1,88 @@
+Flux Pylons License 1.1
+
+Copyright (c) 2025-2026 ZeroTheAbsolute and the respective contributors.
+All rights reserved except for the permissions stated below.
+
+1. Scope
+
+This license covers the Flux Pylons source code, compiled mod, project-created
+assets and documentation supplied with this license (the "Project"). Materials
+identified as third-party work remain under their own licenses. In particular,
+the NeoForged MDK notice in TEMPLATE_LICENSE.txt is unchanged.
+
+2. Playing, research and private changes
+
+You may download, install, run and make necessary local or backup copies of the
+Project. You may run the official mod on a Minecraft client or server. You may
+inspect source code you lawfully obtain and make private changes for learning,
+research, testing and preparing contributions to the official project.
+
+These permissions do not authorize distributing a modified build, operating a
+modified version as a separate public mod project, or incorporating Project code
+or assets into another distributed product.
+
+3. Contributions
+
+You may submit patches, improvements and other contributions to the official
+Flux Pylons project. You may maintain a source-only fork for preparing and
+reviewing such contributions, clearly identified as a contribution fork. This
+exception does not authorize publishing fork binaries or maintaining a separate
+release, port, successor or feature variant.
+
+You retain ownership of your original contributions. By intentionally submitting
+a contribution for inclusion, you grant the maintainers permission to use,
+modify and distribute it as part of the official Project under this license.
+You must have the authority to grant those permissions.
+
+4. Redistribution and modpacks
+
+You may redistribute unmodified official releases of the compiled mod, including
+through third-party launchers, download mirrors, modpacks and server packs,
+without asking for permission. Keep the mod JAR unchanged, retain its copyright
+and license notices, credit Flux Pylons and ZeroTheAbsolute, and link to an
+official project page. Include this license with the download or pack when it
+is not already included in the JAR. Ordinary modpack configuration, scripts and
+resource-pack overrides do not modify the JAR and are permitted; this does not
+permit copying Project code or assets into those overrides.
+
+These redistribution permissions also apply to official Flux Pylons releases
+previously supplied under Flux Pylons License 1.0. You do not need to edit those
+JARs to replace their embedded license; supply this license alongside them.
+
+Except for the permissions in this license or separate written permission from
+ZeroTheAbsolute, you may not distribute modified builds, renamed copies, ports,
+forks as separate mods, versions with added features, or Project source code or
+assets for reuse in another distributed mod or product. Modpack inclusion does
+not grant permission to distribute a derivative version of Flux Pylons.
+
+5. Screenshots, videos and research reports
+
+You may publish gameplay screenshots, videos, reviews and research findings,
+including monetized videos, with reasonable attribution. This permission does
+not authorize distributing Project source, assets or binaries beyond the other
+permissions in this license. Rights you independently have under applicable
+law, including fair use and other copyright exceptions, are unaffected.
+
+6. Names and notices
+
+Keep applicable copyright and license notices with every permitted copy. Do not
+present your work as an official Flux Pylons release or imply endorsement by
+ZeroTheAbsolute. Descriptive references and attribution are permitted; no
+general trademark license is granted.
+
+7. Earlier licenses
+
+This license does not revoke rights already granted for copies previously
+received under another license. It does not override third-party rights or
+permissions that a contributor grants separately for their own work.
+
+8. Warranty and liability
+
+The Project is provided as is, without warranties, to the extent permitted by
+law. The copyright holders and contributors are not liable for claims, damages
+or other liability arising from the Project or its use, to the extent permitted
+by law. Nothing in this section excludes liability that cannot legally be
+excluded.
+
+For permission beyond these terms, contact ZeroTheAbsolute through an official
+Flux Pylons project page.

@@ -1,0 +1,6 @@
+{
+  "parent": "quantumflux:item/quantum_gadget_body",
+  "textures": {
+    "energy": "quantumflux:item/gadget_energy"
+  }
+}

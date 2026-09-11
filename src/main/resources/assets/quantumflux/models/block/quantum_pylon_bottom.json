@@ -1,0 +1,2040 @@
+{
+  "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "steel": "quantumflux:block/pylon_steel",
+    "copper": "quantumflux:block/pylon_copper",
+    "energy": "quantumflux:block/pylon_energy_off",
+    "particle": "quantumflux:block/pylon_steel"
+  },
+  "elements": [
+    {
+      "name": "anchored steel foot",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2.5,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            2.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            2.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            2.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            16,
+            2.5
+          ]
+        }
+      }
+    },
+    {
+      "name": "copper foundation rim",
+      "from": [
+        0.5,
+        2.5,
+        0.5
+      ],
+      "to": [
+        15.5,
+        3.25,
+        15.5
+      ],
+      "faces": {
+        "down": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            15.0,
+            15.0
+          ]
+        },
+        "up": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            15.0,
+            15.0
+          ]
+        },
+        "north": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            15.0,
+            0.75
+          ]
+        },
+        "south": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            15.0,
+            0.75
+          ]
+        },
+        "west": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            15.0,
+            0.75
+          ]
+        },
+        "east": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            15.0,
+            0.75
+          ]
+        }
+      }
+    },
+    {
+      "name": "service housing",
+      "from": [
+        2,
+        3.25,
+        2
+      ],
+      "to": [
+        14,
+        7.5,
+        14
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            12,
+            12
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            12,
+            4.25
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            12,
+            4.25
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            12,
+            4.25
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            12,
+            4.25
+          ]
+        }
+      }
+    },
+    {
+      "name": "inner power spine",
+      "from": [
+        6,
+        7.5,
+        6
+      ],
+      "to": [
+        10,
+        16,
+        10
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            4,
+            8.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            4,
+            8.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            4,
+            8.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            4,
+            8.5
+          ]
+        }
+      }
+    },
+    {
+      "name": "lower column",
+      "from": [
+        7.4,
+        9,
+        4.9
+      ],
+      "to": [
+        8.6,
+        16,
+        5.1
+      ],
+      "faces": {
+        "down": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "up": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "north": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "south": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "west": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "east": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        }
+      },
+      "shade": false
+    },
+    {
+      "name": "raised corner anchorage",
+      "from": [
+        1,
+        2.5,
+        1
+      ],
+      "to": [
+        4.5,
+        7.75,
+        4.5
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        }
+      }
+    },
+    {
+      "name": "corner copper clamp",
+      "from": [
+        2,
+        3,
+        2
+      ],
+      "to": [
+        3.5,
+        8.5,
+        3.5
+      ],
+      "faces": {
+        "down": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "up": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "north": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "south": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "west": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "east": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        }
+      }
+    },
+    {
+      "name": "raised corner anchorage",
+      "from": [
+        1,
+        2.5,
+        11.5
+      ],
+      "to": [
+        4.5,
+        7.75,
+        15.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        }
+      }
+    },
+    {
+      "name": "corner copper clamp",
+      "from": [
+        2,
+        3,
+        12.5
+      ],
+      "to": [
+        3.5,
+        8.5,
+        14.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "up": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "north": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "south": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "west": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "east": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        }
+      }
+    },
+    {
+      "name": "raised corner anchorage",
+      "from": [
+        11.5,
+        2.5,
+        1
+      ],
+      "to": [
+        15.0,
+        7.75,
+        4.5
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        }
+      }
+    },
+    {
+      "name": "corner copper clamp",
+      "from": [
+        12.5,
+        3,
+        2
+      ],
+      "to": [
+        14.0,
+        8.5,
+        3.5
+      ],
+      "faces": {
+        "down": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "up": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "north": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "south": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "west": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "east": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        }
+      }
+    },
+    {
+      "name": "raised corner anchorage",
+      "from": [
+        11.5,
+        2.5,
+        11.5
+      ],
+      "to": [
+        15.0,
+        7.75,
+        15.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            3.5
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            3.5,
+            5.25
+          ]
+        }
+      }
+    },
+    {
+      "name": "corner copper clamp",
+      "from": [
+        12.5,
+        3,
+        12.5
+      ],
+      "to": [
+        14.0,
+        8.5,
+        14.0
+      ],
+      "faces": {
+        "down": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "up": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            1.5
+          ]
+        },
+        "north": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "south": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "west": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        },
+        "east": {
+          "texture": "#copper",
+          "uv": [
+            0,
+            0,
+            1.5,
+            5.5
+          ]
+        }
+      }
+    },
+    {
+      "name": "cross-braced shaft",
+      "from": [
+        7.45,
+        8.5,
+        3.1
+      ],
+      "to": [
+        8.55,
+        16,
+        4.3
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999997
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999997
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.25,
+          3.7
+        ],
+        "axis": "z",
+        "angle": -45
+      }
+    },
+    {
+      "name": "cross-braced shaft",
+      "from": [
+        7.45,
+        8.5,
+        3.1
+      ],
+      "to": [
+        8.55,
+        16,
+        4.3
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999997
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999997
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.25,
+          3.7
+        ],
+        "axis": "z",
+        "angle": 45
+      }
+    },
+    {
+      "name": "cross-braced shaft",
+      "from": [
+        7.45,
+        8.5,
+        11.7
+      ],
+      "to": [
+        8.55,
+        16,
+        12.899999999999999
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999993
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999993
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.25,
+          12.299999999999999
+        ],
+        "axis": "z",
+        "angle": -45
+      }
+    },
+    {
+      "name": "cross-braced shaft",
+      "from": [
+        7.45,
+        8.5,
+        11.7
+      ],
+      "to": [
+        8.55,
+        16,
+        12.899999999999999
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999993
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            1.1999999999999993
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          8,
+          12.25,
+          12.299999999999999
+        ],
+        "axis": "z",
+        "angle": 45
+      }
+    },
+    {
+      "name": "side shaft bracing",
+      "from": [
+        3.1,
+        8.5,
+        7.45
+      ],
+      "to": [
+        4.3,
+        16,
+        8.55
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            1.1000000000000005
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            1.1000000000000005
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          3.7,
+          12.25,
+          8
+        ],
+        "axis": "x",
+        "angle": -45
+      }
+    },
+    {
+      "name": "side shaft bracing",
+      "from": [
+        3.1,
+        8.5,
+        7.45
+      ],
+      "to": [
+        4.3,
+        16,
+        8.55
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            1.1000000000000005
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            1.1000000000000005
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999997,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          3.7,
+          12.25,
+          8
+        ],
+        "axis": "x",
+        "angle": 45
+      }
+    },
+    {
+      "name": "side shaft bracing",
+      "from": [
+        11.7,
+        8.5,
+        7.45
+      ],
+      "to": [
+        12.899999999999999,
+        16,
+        8.55
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            1.1000000000000005
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            1.1000000000000005
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          12.299999999999999,
+          12.25,
+          8
+        ],
+        "axis": "x",
+        "angle": -45
+      }
+    },
+    {
+      "name": "side shaft bracing",
+      "from": [
+        11.7,
+        8.5,
+        7.45
+      ],
+      "to": [
+        12.899999999999999,
+        16,
+        8.55
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            1.1000000000000005
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            1.1000000000000005
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1999999999999993,
+            7.5
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.1000000000000005,
+            7.5
+          ]
+        }
+      },
+      "rotation": {
+        "origin": [
+          12.299999999999999,
+          12.25,
+          8
+        ],
+        "axis": "x",
+        "angle": 45
+      }
+    },
+    {
+      "name": "recessed service readout",
+      "from": [
+        5,
+        4.25,
+        1.9
+      ],
+      "to": [
+        11,
+        6.7,
+        1.98
+      ],
+      "faces": {
+        "down": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "up": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "north": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "south": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "west": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "east": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        }
+      },
+      "shade": false
+    },
+    {
+      "name": "recessed service readout",
+      "from": [
+        5,
+        4.25,
+        14.02
+      ],
+      "to": [
+        11,
+        6.7,
+        14.1
+      ],
+      "faces": {
+        "down": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "up": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "north": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "south": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "west": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        },
+        "east": {
+          "texture": "#energy",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "tintindex": 0,
+          "neoforge_data": {
+            "block_light": 15,
+            "sky_light": 15
+          }
+        }
+      },
+      "shade": false
+    },
+    {
+      "name": "steel frame column",
+      "from": [
+        3.25,
+        7,
+        3.25
+      ],
+      "to": [
+        4.35,
+        16,
+        4.35
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "name": "steel frame column",
+      "from": [
+        3.25,
+        7,
+        11.65
+      ],
+      "to": [
+        4.35,
+        16,
+        12.75
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "name": "steel frame column",
+      "from": [
+        11.65,
+        7,
+        3.25
+      ],
+      "to": [
+        12.75,
+        16,
+        4.35
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "name": "steel frame column",
+      "from": [
+        11.65,
+        7,
+        11.65
+      ],
+      "to": [
+        12.75,
+        16,
+        12.75
+      ],
+      "faces": {
+        "down": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            1.0999999999999996
+          ]
+        },
+        "north": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [
+            0,
+            0,
+            1.0999999999999996,
+            9
+          ]
+        }
+      }
+    }
+  ]
+}

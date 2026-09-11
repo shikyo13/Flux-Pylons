@@ -1,0 +1,11 @@
+{
+  "parent": "quantumflux:item/quantum_gadget_body",
+  "overrides": [
+    {
+      "predicate": {
+        "quantumflux:active": 1
+      },
+      "model": "quantumflux:item/quantum_gadget_active"
+    }
+  ]
+}

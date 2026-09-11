@@ -1,0 +1,45 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+.venv
+/src/generated/resources/.cache/
+
+# other
+eclipse
+run
+runs
+run-data
+.vscode/
+__pycache__/
+*.py[cod]
+
+# Rejected local concept exports. These have no verified provenance and are not
+# part of the production asset pipeline.
+/Quantum Pylon.png
+/QuantumGadget1.png
+/QuantumGadget2.png
+/QuantumGadget*.zip
+/QuantumPylon*.zip
+/tools/references/
+
+repo
+# Claude Code
+.claude/settings.local.json
+
+# Runtime logs from local test launches
+logs/

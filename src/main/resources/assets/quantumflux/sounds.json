@@ -1,0 +1,32 @@
+{
+  "gadget_on": {
+    "subtitle": "subtitles.quantumflux.gadget_on",
+    "sounds": [
+      {
+        "name": "quantumflux:gadget_on",
+        "stream": false,
+        "preload": true
+      }
+    ]
+  },
+  "gadget_off": {
+    "subtitle": "subtitles.quantumflux.gadget_off",
+    "sounds": [
+      {
+        "name": "quantumflux:gadget_off",
+        "stream": false,
+        "preload": true
+      }
+    ]
+  },
+  "pylon_hum": {
+    "subtitle": "subtitles.quantumflux.pylon_hum",
+    "sounds": [
+      {
+        "name": "quantumflux:pylon_hum",
+        "stream": false,
+        "preload": true
+      }
+    ]
+  }
+}

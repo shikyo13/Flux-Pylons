@@ -1,0 +1,6 @@
+{
+  "parent": "quantumflux:block/quantum_pylon_top",
+  "textures": {
+    "energy": "quantumflux:block/pylon_energy"
+  }
+}

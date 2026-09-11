@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "conditions": [
+            {
+              "block": "quantumflux:quantum_pylon",
+              "condition": "minecraft:block_state_property",
+              "properties": {
+                "half": "bottom"
+              }
+            }
+          ],
+          "name": "quantumflux:quantum_pylon"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "quantumflux:blocks/quantum_pylon"
+}

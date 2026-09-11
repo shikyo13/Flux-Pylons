@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible problem with Flux Pylons.
+title: ""
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Minecraft, loader and Flux Pylons versions.
+      placeholder: Minecraft 1.21.1, NeoForge 21.1.250, Flux Pylons 1.1.0
+    validations:
+      required: true
+  - type: input
+    id: pack
+    attributes:
+      label: Modpack and affected machines
+      description: Include the pack version or machine mod when relevant.
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: What happened?
+      description: Steps to reproduce, what you expected, and what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots or logs
+      description: A gadget status screenshot helps. Remove tokens, account details and private server information from logs.
+

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "active=false,half=bottom": {
+      "model": "quantumflux:block/quantum_pylon_bottom"
+    },
+    "active=false,half=top": {
+      "model": "quantumflux:block/quantum_pylon_top"
+    },
+    "active=true,half=bottom": {
+      "model": "quantumflux:block/quantum_pylon_bottom_active"
+    },
+    "active=true,half=top": {
+      "model": "quantumflux:block/quantum_pylon_top_active"
+    }
+  }
+}
