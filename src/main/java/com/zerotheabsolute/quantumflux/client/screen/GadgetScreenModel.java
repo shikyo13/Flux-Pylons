@@ -10,6 +10,7 @@ import com.zerotheabsolute.quantumflux.network.NetworkTelemetryPayload;
 import com.zerotheabsolute.quantumflux.util.BeamStyle;
 import com.zerotheabsolute.quantumflux.util.PriorityMode;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -109,7 +110,7 @@ final class GadgetScreenModel {
         Component machineName;
         if (displayName == null || displayName.isBlank()) {
             machineName = Component.translatable("screen.quantumflux.pylons.unknown_machine");
-        } else if (displayName.startsWith("block.") || displayName.startsWith("item.")) {
+        } else if (I18n.exists(displayName)) {
             machineName = Component.translatable(displayName);
         } else {
             machineName = Component.literal(displayName);
