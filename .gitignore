@@ -43,3 +43,13 @@ repo
 
 # Runtime logs from local test launches
 logs/
+
+# External workspace material
+/tools/
+/demo/
+/docs/evidence/
+/docs/media/
+/docs/publishing/
+/src/test/
+/src/gametest/
+/requirements-assets.txt
