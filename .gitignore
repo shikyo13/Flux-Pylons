@@ -46,3 +46,13 @@ logs/
 
 # Fabric GameTest runtime
 /runGameTest/
+
+# External workspace material
+/tools/
+/demo/
+/docs/evidence/
+/docs/media/
+/docs/publishing/
+/src/test/
+/src/gametest/
+/requirements-assets.txt

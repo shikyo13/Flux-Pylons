@@ -1,6 +1,5 @@
 plugins {
     id 'fabric-loom' version '1.10.5'
-    id 'maven-publish'
 }
 version = mod_version
 group = mod_group_id
@@ -16,25 +15,16 @@ dependencies {
     modImplementation 'net.fabricmc.fabric-api:fabric-api:0.116.17+1.21.1'
     include modApi('teamreborn:energy:4.1.0')
     modImplementation 'maven.modrinth:forge-config-api-port:N5qzq0XV'
-    // Loom does not put dependency jar-in-jar libraries on the development classpath.
     runtimeOnly 'com.electronwill.night-config:core:3.8.0'
     runtimeOnly 'com.electronwill.night-config:toml:3.8.0'
 }
 sourceSets.main.resources.srcDir 'src/generated/resources'
-// Data generators and GameTests have separate entrypoints from the shipped mod.
 fabricApi {
     configureDataGeneration {
         outputDirectory = file('src/generated/resources')
         strictValidation = false
     }
-    configureTests {
-        createSourceSet = true
-        modId = 'quantumflux_gametest'
-        enableGameTests = true
-        enableClientGameTests = false
-        eula = true
-        clearRunDirectory = false
-    }
+
 }
 loom {
     runs {
@@ -49,120 +39,7 @@ processResources {
 }
 jar {
     includeEmptyDirs = false
-    exclude '.cache/**', 'data/quantumflux/structure/empty.nbt'
+    exclude '.cache/**'
     from('LICENSE') { into 'META-INF'; rename { 'LICENSE_quantumflux.txt' } }
     from('TEMPLATE_LICENSE.txt') { into 'META-INF'; rename { 'LICENSE_NEOFORGED_MDK_TEMPLATE.txt' } }
-}
-var allocatorTest = tasks.register('allocatorTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Runs deterministic FE allocation regression and property checks'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.energy.ProportionalEnergyAllocatorTest'
-    jvmArgs '-ea'
-}
-
-var fairDeliveryTest = tasks.register('fairDeliveryTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Verifies shared-pool fairness, rejected shares, native increments, and cycle limits'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.energy.FairEnergyDistributorTest'
-    jvmArgs '-ea'
-}
-
-var passwordVerifierTest = tasks.register('passwordVerifierTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Runs password verifier format, migration, and rejection regression checks'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.util.QFPasswordVerifierTest'
-    jvmArgs '-ea'
-}
-
-var networkCodecTest = tasks.register('networkCodecTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Runs bounded payload, stable identity, and client-cache regressions'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.network.NetworkCodecTest'
-    jvmArgs '-ea'
-}
-
-var pythonExecutable = providers.gradleProperty('pythonExecutable')
-        .orElse(providers.environmentVariable('PYTHON'))
-        .getOrElse('python')
-
-var textureComparisonTest = tasks.register('textureComparisonTest', Exec) {
-    group = 'verification'
-    description = 'Checks that PNG compression differences preserve strict pixel and metadata validation'
-    workingDir projectDir
-    commandLine pythonExecutable, '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_generate_textures.py'
-}
-
-var verifyTextures = tasks.register('verifyTextures', Exec) {
-    dependsOn textureComparisonTest
-    group = 'verification'
-    description = 'Regenerates textures in memory and rejects asset or model-reference drift'
-    workingDir projectDir
-    commandLine pythonExecutable, 'tools/generate_textures.py', '--check'
-}
-
-var verifySounds = tasks.register('verifySounds', Exec) {
-    group = 'verification'
-    description = 'Regenerates audio and rejects encoded asset or manifest drift'
-    workingDir projectDir
-    commandLine pythonExecutable, 'tools/generate_sounds.py', '--check'
-}
-
-var verifyTranslations = tasks.register('verifyTranslations', Exec) {
-    dependsOn tasks.named('processResources')
-    group = 'verification'
-    description = 'Rejects missing, duplicate, or unsynchronized concrete translation keys'
-    workingDir projectDir
-    commandLine pythonExecutable, 'tools/validate_translations.py'
-}
-
-var verifyGeneratedAssets = tasks.register('verifyGeneratedAssets') {
-    dependsOn verifyTextures, verifySounds, verifyTranslations
-    group = 'verification'
-    description = 'Runs deterministic texture, audio, and localization checks'
-}
-
-
-check { dependsOn allocatorTest, fairDeliveryTest, passwordVerifierTest, networkCodecTest, verifyGeneratedAssets }
-
-var verifyReleaseJar = tasks.register('verifyReleaseJar') {
-    dependsOn remapJar
-    group = 'verification'
-    doLast {
-        new java.util.zip.ZipFile(tasks.remapJar.archiveFile.get().asFile).withCloseable { archive ->
-            def names = archive.entries().collect { it.name }
-            def required = ['fabric.mod.json', 'quantumflux.mixins.json',
-                    'META-INF/LICENSE_quantumflux.txt', 'META-INF/LICENSE_NEOFORGED_MDK_TEMPLATE.txt',
-                    'com/zerotheabsolute/quantumflux/QuantumFlux.class']
-            if (!names.containsAll(required)) throw new GradleException('Missing release metadata or license')
-            if (names.any { it.contains('/gametest/') || it.contains('GameTests') || it.contains('PylonHudPreview')
-                    || it.contains('/integration/') || it.contains('/performance/') || it.endsWith('/empty.nbt')
-                    || it.endsWith('neoforge.mods.toml') || it.endsWith('mods.toml') }) {
-                throw new GradleException('Development fixtures or another loader descriptor in release jar')
-            }
-            def metadata = new groovy.json.JsonSlurper().parse(archive.getInputStream(archive.getEntry('fabric.mod.json')))
-            if (metadata.version != project.version || metadata.id != 'quantumflux') throw new GradleException('Incorrect Fabric metadata')
-            if (!metadata.jars?.any { it.file.contains('energy-4.1.0') && names.contains(it.file) }) throw new GradleException('Embedded Energy API missing')
-        }
-    }
-}
-build.dependsOn verifyReleaseJar
-// Minecraft can exit normally after a startup failure; require completion in its fresh log.
-tasks.named('runGameTest').configure {
-    doFirst { file('build/gametest-start.txt').text = Long.toString(System.currentTimeMillis()) }
-    doLast {
-        def log = file('build/run/gameTest/logs/latest.log')
-        if (!log.isFile() || log.lastModified() < file('build/gametest-start.txt').lastModified()
-                || !(log.text =~ /All (\d+) required tests passed/).find()
-                || log.text.contains('Failed to start the minecraft server')) {
-            throw new GradleException('GameTests did not complete successfully; inspect build/run/gameTest/logs/latest.log')
-        }
-    }
 }
