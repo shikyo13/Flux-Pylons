@@ -8,3 +8,7 @@ Base contributions on `main`. Preserve the existing `quantumflux` registry and s
 
 The [license](LICENSE) permits private research and contributions, including clearly labeled source-only contribution forks. It does not permit publishing a separate mod, port, feature variant or fork binary without permission. Contributors retain ownership of their original work and grant the maintainers permission to include it in the official project under the project license. Only submit work you have the right to contribute.
 
+
+## Repository scope
+
+Keep mod source, runtime assets, build files, and user or developer documentation here. Keep test harnesses, demo projects, recordings, asset-generation scripts, and publishing tooling in an external workspace. In-game tutorials are part of the mod.
