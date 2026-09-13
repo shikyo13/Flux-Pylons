@@ -51,19 +51,10 @@ Use the file's version and loader tags when downloading. See the [roadmap](ROADM
 Use JDK 17 and the included Gradle wrapper:
 
 ```sh
-./gradlew assemble
+./gradlew build
 ```
 
 The JAR is written to `build/libs/`. The 1.20.1 branches use JDK 17; 1.21.1 uses JDK 21. [Release 1.2.0](https://github.com/shikyo13/Flux-Pylons/releases/tag/v1.2.0) includes all five builds.
-
-For the full build and asset verification, install Python 3.13.3, `requirements-assets.txt`, and FFmpeg 8.0.1 with libvorbis. The [build workflow](.github/workflows/build.yml) pins the Linux FFmpeg build used for byte-identical audio:
-
-```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-assets.txt
-./gradlew build -PpythonExecutable=.venv/bin/python
-./gradlew runGameTestServer
-```
 
 ## Contributing and license
 

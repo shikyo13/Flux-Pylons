@@ -15,7 +15,7 @@ public class QFItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        // Instrument geometry is generated from tools/generate_models.py.
+        // Instrument geometry is supplied by the committed block models.
         for (String type : new String[]{"range", "capacity", "throughput", "buffer"}) {
             withExistingParent(type + "_upgrade", mcLoc("item/generated"))
                     .texture("layer0", modLoc("item/" + type + "_upgrade"));
