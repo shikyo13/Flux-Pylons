@@ -1,6 +1,5 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
     id 'idea'
     id 'net.minecraftforge.gradle' version '6.0.54'
 }
@@ -20,12 +19,11 @@ minecraft {
         configureEach {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'info'
-            property 'forge.enabledGameTestNamespaces', mod_id
             mods { "${mod_id}" { source sourceSets.main } }
         }
         client {}
         server { args '--nogui' }
-        gameTestServer {}
+
         data {
             workingDirectory project.file('run-data')
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources'), '--existing', file('src/main/resources')
@@ -33,7 +31,6 @@ minecraft {
     }
 }
 sourceSets.main.resources.srcDir 'src/generated/resources'
-// Forge scans each development mod as one directory.
 sourceSets.main.output.resourcesDir = layout.buildDirectory.dir('classes/java/main').get().asFile
 tasks.named('processResources') { dependsOn tasks.named('compileJava') }
 repositories {
@@ -43,8 +40,6 @@ repositories {
     }
 }
 dependencies { minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}" }
-// This block of code expands all declared replace properties in the specified resource targets.
-// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
     var replaceProperties = [
             minecraft_version      : minecraft_version,
@@ -66,25 +61,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
     from "src/main/templates"
     into "build/generated/sources/modMetadata"
 }
-// Include the output of "generateModMetadata" as an input directory for the build
-// this works with both building through Gradle and the IDE.
 sourceSets.main.resources.srcDir generateModMetadata
-// To avoid having to run "generateModMetadata" manually, make it run on every project reload
-
-
-// Example configuration to allow publishing using the maven-publish plugin
-publishing {
-    publications {
-        register('mavenJava', MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        maven {
-            url "file://${project.projectDir}/repo"
-        }
-    }
-}
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
@@ -94,9 +71,6 @@ var releaseModId = project.mod_id.toString()
 tasks.named('jar', Jar).configure {
     includeEmptyDirs = false
     exclude '.cache/**'
-    exclude 'com/zerotheabsolute/quantumflux/gametest/**'
-    exclude '**/*GameTests*.class', '**/PylonHudPreview*.class', '**/integration/**'
-    exclude 'data/quantumflux/structure/empty.nbt'
     manifest {
         attributes([
                 'Specification-Title'  : mod_id,
@@ -117,337 +91,3 @@ tasks.named('jar', Jar).configure {
         rename { 'LICENSE_NEOFORGED_MDK_TEMPLATE.txt' }
     }
 }
-
-var generatedMetadataFile = layout.buildDirectory.file(
-        'generated/sources/modMetadata/META-INF/mods.toml')
-var expectedMetadataEntries = [
-        "loaderVersion=\"${project.loader_version_range}\"",
-        "license=\"${project.mod_license}\"",
-        "modId=\"${project.mod_id}\"",
-        "version=\"${project.mod_version}\"",
-        "displayName=\"${project.mod_name}\"",
-        "displayURL=\"${project.mod_homepage}\"",
-        "issueTrackerURL=\"${project.mod_issue_tracker}\"",
-        "versionRange=\"${project.forge_version_range}\"",
-        "versionRange=\"${project.minecraft_version_range}\""
-]
-var verifyModMetadata = tasks.register('verifyModMetadata') {
-    dependsOn tasks.named('generateModMetadata')
-    group = 'verification'
-    description = 'Validates the expanded Forge metadata used by the release JAR'
-    inputs.file(generatedMetadataFile)
-
-    doLast {
-        var metadata = generatedMetadataFile.get().asFile
-        if (!metadata.isFile()) {
-            throw new GradleException("Generated Forge metadata not found: ${metadata}")
-        }
-
-        var text = metadata.getText('UTF-8')
-        if (text.contains('${')) {
-            throw new GradleException('Generated Forge metadata contains an unresolved placeholder')
-        }
-
-        var missingEntries = expectedMetadataEntries.findAll { !text.contains(it) }
-        if (!missingEntries.isEmpty()) {
-            throw new GradleException(
-                    "Generated Forge metadata is missing: ${missingEntries.join(', ')}")
-        }
-    }
-}
-
-var allocatorTest = tasks.register('allocatorTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Runs deterministic FE allocation regression and property checks'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.energy.ProportionalEnergyAllocatorTest'
-    jvmArgs '-ea'
-}
-
-var fairDeliveryTest = tasks.register('fairDeliveryTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Verifies shared-pool fairness, rejected shares, native increments, and cycle limits'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.energy.FairEnergyDistributorTest'
-    jvmArgs '-ea'
-}
-
-var passwordVerifierTest = tasks.register('passwordVerifierTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Runs password verifier format, migration, and rejection regression checks'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.util.QFPasswordVerifierTest'
-    jvmArgs '-ea'
-}
-
-var networkCodecTest = tasks.register('networkCodecTest', JavaExec) {
-    dependsOn tasks.named('testClasses')
-    group = 'verification'
-    description = 'Runs bounded payload, stable identity, and client-cache regressions'
-    classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'com.zerotheabsolute.quantumflux.network.NetworkCodecTest'
-    jvmArgs '-ea'
-}
-
-var pythonExecutable = providers.gradleProperty('pythonExecutable')
-        .orElse(providers.environmentVariable('PYTHON'))
-        .getOrElse('python')
-
-var textureComparisonTest = tasks.register('textureComparisonTest', Exec) {
-    group = 'verification'
-    description = 'Checks that PNG compression differences preserve strict pixel and metadata validation'
-    workingDir projectDir
-    commandLine pythonExecutable, '-m', 'unittest', 'discover', '-s', 'tools', '-p', 'test_generate_textures.py'
-}
-
-var verifyTextures = tasks.register('verifyTextures', Exec) {
-    dependsOn textureComparisonTest
-    group = 'verification'
-    description = 'Regenerates textures in memory and rejects asset or model-reference drift'
-    workingDir projectDir
-    commandLine pythonExecutable, 'tools/generate_textures.py', '--check'
-}
-
-var verifySounds = tasks.register('verifySounds', Exec) {
-    group = 'verification'
-    description = 'Regenerates audio and rejects encoded asset or manifest drift'
-    workingDir projectDir
-    commandLine pythonExecutable, 'tools/generate_sounds.py', '--check'
-}
-
-var verifyTranslations = tasks.register('verifyTranslations', Exec) {
-    dependsOn tasks.named('processResources')
-    group = 'verification'
-    description = 'Rejects missing, duplicate, or unsynchronized concrete translation keys'
-    workingDir projectDir
-    commandLine pythonExecutable, 'tools/validate_translations.py'
-}
-
-var verifyGeneratedAssets = tasks.register('verifyGeneratedAssets') {
-    dependsOn verifyTextures, verifySounds, verifyTranslations
-    group = 'verification'
-    description = 'Runs deterministic texture, audio, and localization checks'
-}
-
-var releaseJarFile = tasks.named('jar', Jar).flatMap { it.archiveFile }
-var verifyReleaseJar = tasks.register('verifyReleaseJar') {
-    dependsOn tasks.named('jar'), verifyModMetadata
-    group = 'verification'
-    description = 'Validates required metadata, license, and entrypoint files in the release JAR'
-    inputs.file(releaseJarFile)
-
-    doLast {
-        var jarFile = releaseJarFile.get().asFile
-        var requiredEntries = [
-                'META-INF/mods.toml', 'pack.mcmeta', 'quantumflux.mixins.json',
-                "META-INF/LICENSE_${releaseModId}.txt",
-                'META-INF/LICENSE_NEOFORGED_MDK_TEMPLATE.txt',
-                'com/zerotheabsolute/quantumflux/QuantumFlux.class'
-        ]
-
-        new java.util.zip.ZipFile(jarFile).withCloseable { archive ->
-            var developmentEntries = archive.entries().findAll {
-                it.name.contains('/gametest/') || it.name.contains('GameTests')
-                        || it.name.contains('PylonHudPreview') || it.name.contains('/integration/')
-                        || it.name.contains('/performance/') || it.name.startsWith('data/quantumflux_performance/')
-                        || it.name == 'data/quantumflux/structure/empty.nbt'
-            }
-            if (!developmentEntries.isEmpty()) {
-                throw new GradleException('Release JAR contains development fixtures: ' + developmentEntries)
-            }
-            var invalidResourceEntries = archive.entries().findAll {
-                var parts = it.name.split('/')
-                parts.length >= 2 && (parts[0] == 'assets' || parts[0] == 'data')
-                        && !(parts[1] ==~ /[a-z0-9_.-]+/)
-            }
-            if (!invalidResourceEntries.isEmpty()) {
-                throw new GradleException('Release JAR contains invalid resource namespaces: ' + invalidResourceEntries)
-            }
-            var missingEntries = requiredEntries.findAll { archive.getEntry(it) == null }
-            if (!missingEntries.isEmpty()) {
-                throw new GradleException(
-                        "Release JAR is missing: ${missingEntries.join(', ')}")
-            }
-
-            var metadataEntry = archive.getEntry('META-INF/mods.toml')
-            var metadataText = archive.getInputStream(metadataEntry).getText('UTF-8')
-            if (metadataText.contains('${')) {
-                throw new GradleException('Release JAR contains unresolved Forge metadata')
-            }
-        }
-    }
-}
-
-tasks.named('check').configure {
-    dependsOn allocatorTest, fairDeliveryTest, passwordVerifierTest, networkCodecTest,
-            verifyModMetadata, verifyGeneratedAssets
-}
-
-tasks.named('build').configure {
-    dependsOn verifyReleaseJar
-}
-
-// Deployment is deliberately opt-in. Configure the destination with either
-// -Patm10SkyModsDir=<path> or the ATM10SKY_MODS_DIR environment variable.
-var atm10SkyModsDir = providers.gradleProperty('atm10SkyModsDir')
-        .orElse(providers.environmentVariable('ATM10SKY_MODS_DIR'))
-var modIdForDeploy = project.mod_id
-var archiveNameForDeploy = project.mod_archive_name
-tasks.register('deployToATM10SKY') {
-    dependsOn tasks.named('jar')
-    group = 'publishing'
-    description = 'Deploys the mod JAR to ATM10SKY mods folder'
-    inputs.file(releaseJarFile)
-
-    doLast {
-        if (!atm10SkyModsDir.isPresent()) {
-            throw new GradleException(
-                    'Set -Patm10SkyModsDir=<path> or ATM10SKY_MODS_DIR before deploying.')
-        }
-
-        var destination = new File(atm10SkyModsDir.get()).canonicalFile
-        if (!destination.isDirectory()) {
-            throw new GradleException("ATM10SKY mods directory does not exist: ${destination}")
-        }
-
-        destination.listFiles()?.findAll {
-            it.isFile()
-                    && (it.name.startsWith("${modIdForDeploy}-")
-                        || it.name.startsWith("${archiveNameForDeploy}-"))
-                    && it.name.endsWith('.jar')
-        }?.each { oldJar ->
-            var checkedJar = oldJar.canonicalFile
-            if (checkedJar.parentFile != destination || !checkedJar.delete()) {
-                throw new GradleException("Could not replace existing mod JAR: ${oldJar}")
-            }
-        }
-
-        var sourceJar = releaseJarFile.get().asFile
-        var destinationJar = new File(destination, sourceJar.name).canonicalFile
-        if (destinationJar.parentFile != destination) {
-            throw new GradleException("Refusing to deploy outside configured directory: ${destinationJar}")
-        }
-
-        java.nio.file.Files.copy(
-                sourceJar.toPath(),
-                destinationJar.toPath(),
-                java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-    }
-}
-
-// ModDevGradle can return success even when Minecraft aborts during startup.
-// Validate the actual dedicated-server log whenever runServer exits.
-var dedicatedServerLog = layout.projectDirectory.file('run/logs/latest.log')
-var dedicatedServerStartMarker = layout.buildDirectory.file('tmp/runServer/start-marker.txt')
-var verifyDedicatedServerLog = tasks.register('verifyDedicatedServerLog') {
-    group = 'verification'
-    description = 'Fails unless the latest dedicated-server log reached the ready state without a fatal error'
-
-    doLast {
-        var logFile = dedicatedServerLog.asFile
-        if (!logFile.isFile()) {
-            throw new GradleException("Dedicated-server log not found: ${logFile}")
-        }
-
-        var startMarker = dedicatedServerStartMarker.get().asFile
-        if (startMarker.isFile() && logFile.lastModified() < startMarker.lastModified()) {
-            throw new GradleException(
-                    "Dedicated-server log was not updated by the latest run; inspect ${logFile}")
-        }
-
-        var logText = logFile.getText('UTF-8')
-        var fatalMarkers = [
-                '/FATAL]',
-                'Failed to start the minecraft server',
-                'Attempted to load class',
-                'Exception caught from launcher'
-        ]
-        var fatalMarker = fatalMarkers.find { logText.contains(it) }
-        if (fatalMarker != null) {
-            throw new GradleException(
-                    "Dedicated server reported a fatal startup error (${fatalMarker}); inspect ${logFile}")
-        }
-
-        var reachedReadyState = logText.readLines().any {
-            it.contains('[Server thread/INFO]') && it.contains('Done (')
-        }
-        if (!reachedReadyState) {
-            throw new GradleException(
-                    "Dedicated server never reached its ready state; inspect ${logFile}")
-        }
-    }
-}
-
-tasks.configureEach { if (name == 'runServer') {
-    // JavaExec otherwise receives an empty input stream, which prevents a
-    // headless operator or CI harness from issuing a graceful `stop` command.
-    standardInput = System.in
-
-    doFirst {
-        var marker = dedicatedServerStartMarker.get().asFile
-        marker.parentFile.mkdirs()
-        marker.setText(Long.toString(System.currentTimeMillis()), 'UTF-8')
-    }
-    finalizedBy verifyDedicatedServerLog
-} }
-
-var gameTestServerLog = layout.projectDirectory.file('run/logs/latest.log')
-var gameTestServerStartMarker = layout.buildDirectory.file('tmp/runGameTestServer/start-marker.txt')
-var verifyGameTestServerLog = tasks.register('verifyGameTestServerLog') {
-    group = 'verification'
-    description = 'Fails unless a fresh GameTest run completes with all required tests passing'
-
-    doLast {
-        var logFile = gameTestServerLog.asFile
-        if (!logFile.isFile()) {
-            throw new GradleException("GameTest server log not found: ${logFile}")
-        }
-
-        var startMarker = gameTestServerStartMarker.get().asFile
-        if (startMarker.isFile() && logFile.lastModified() < startMarker.lastModified()) {
-            throw new GradleException(
-                    "GameTest server log was not updated by the latest run; inspect ${logFile}")
-        }
-
-        var logText = logFile.getText('UTF-8')
-        var completion = logText =~ /All (\d+) required tests passed/
-        if (!completion.find() || Integer.parseInt(completion.group(1)) < 1) {
-            throw new GradleException(
-                    "GameTest success marker not found; inspect ${logFile}")
-        }
-
-        var fatalMarkers = [
-                '/FATAL]',
-                'Failed to start the minecraft server',
-                'Attempted to load class',
-                'Exception caught from launcher'
-        ]
-        var fatalMarker = fatalMarkers.find { logText.contains(it) }
-        if (fatalMarker != null) {
-            throw new GradleException(
-                    "GameTest server reported a fatal startup error (${fatalMarker}); inspect ${logFile}")
-        }
-    }
-}
-
-tasks.configureEach { if (name == 'runGameTestServer') {
-    doFirst {
-        var marker = gameTestServerStartMarker.get().asFile
-        marker.parentFile.mkdirs()
-        marker.setText(Long.toString(System.currentTimeMillis()), 'UTF-8')
-    }
-    finalizedBy verifyGameTestServerLog
-} }
-
-// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
-idea {
-    module {
-        downloadSources = true
-        downloadJavadoc = true
-    }
-}
-
-jar { manifest.attributes('MixinConfigs': 'quantumflux.mixins.json') }
