@@ -11,4 +11,4 @@ The [license](LICENSE) permits private research and contributions, including cle
 
 ## Repository scope
 
-Keep mod source, runtime assets, build files, and user or developer documentation here. Keep test harnesses, demo projects, recordings, asset-generation scripts, and publishing tooling in an external workspace. In-game tutorials are part of the mod.
+Keep mod source, runtime assets, build files, and user or developer documentation here. Keep test scripts, unused assets, etc. out of the public repo. 
