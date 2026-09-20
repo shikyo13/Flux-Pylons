@@ -2,3 +2,7 @@ pluginManagement {
     repositories { maven { url = 'https://maven.fabricmc.net/' }; gradlePluginPortal() }
 }
 rootProject.name = 'flux-pylons-fabric-1.21.1'
+
+includeBuild("../ZeroMods-Core") {
+    dependencySubstitution { substitute module("com.zeromods:zeromods-core-fabric-1.21.1") using project(":fabric-1.21.1") }
+}

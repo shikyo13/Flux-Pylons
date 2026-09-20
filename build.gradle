@@ -43,3 +43,5 @@ jar {
     from('LICENSE') { into 'META-INF'; rename { 'LICENSE_quantumflux.txt' } }
     from('TEMPLATE_LICENSE.txt') { into 'META-INF'; rename { 'LICENSE_NEOFORGED_MDK_TEMPLATE.txt' } }
 }
+
+dependencies { include(modImplementation('com.zeromods:zeromods-core-fabric-1.21.1:0.1.2')) }
