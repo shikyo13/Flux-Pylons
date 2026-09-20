@@ -91,3 +91,20 @@ tasks.named('jar', Jar).configure {
         rename { 'LICENSE_NEOFORGED_MDK_TEMPLATE.txt' }
     }
 }
+
+jarJar.enable()
+dependencies {
+    implementation 'com.zeromods:zeromods-core-forge-1.21.1:0.1.2'
+    jarJar('com.zeromods:zeromods-core-forge-1.21.1:[0.1.2,0.2.0)') {
+        jarJar.pin(it, '0.1.2')
+        transitive = false
+    }
+}
+tasks.named('jar') { archiveClassifier = 'slim' }
+tasks.named('jarJar') {
+    archiveClassifier = ''
+    includeEmptyDirs = false
+    exclude '.cache/**'
+    from('LICENSE') { into 'META-INF' }
+}
+tasks.named('build') { dependsOn tasks.named('jarJar') }

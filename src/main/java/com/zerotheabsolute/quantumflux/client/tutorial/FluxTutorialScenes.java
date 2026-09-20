@@ -1,6 +1,8 @@
 package com.zerotheabsolute.quantumflux.client.tutorial;
 
 import com.zerotheabsolute.quantumflux.client.PylonStatus;
+import com.zeromods.core.client.ModelPreview;
+import com.zeromods.core.tutorial.TutorialTimeline;
 import com.zerotheabsolute.quantumflux.init.QFDataComponents;
 import com.zerotheabsolute.quantumflux.init.QFItems;
 import com.zerotheabsolute.quantumflux.item.UpgradeType;
@@ -14,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import static com.zerotheabsolute.quantumflux.client.tutorial.FluxTutorialScreen.*;
 
 final class FluxTutorialScenes {
+    static final double STEP_SECONDS = 6;
     private static final String[] CHAPTERS = {"setup", "linking", "power", "status", "upgrades"};
     private static final ResourceLocation BACKDROP = ResourceLocation.fromNamespaceAndPath("quantumflux", "textures/gui/tutorial_forest.png");
     private static final PylonStatus[] STATES = {PylonStatus.UNLINKED, PylonStatus.NO_POWER,
@@ -24,7 +27,7 @@ final class FluxTutorialScenes {
     static double[] durations() { return new double[] {24, 24, 24, 36, 24}; }
     static Component title(int chapter) { return text(CHAPTERS[chapter] + ".title"); }
     static int stepCount(int chapter) { return chapter == 3 ? 6 : 4; }
-    static int step(int chapter, double time) { return Math.min(stepCount(chapter) - 1, (int) (time / 6)); }
+    static int step(int chapter, double time) { return Math.min(stepCount(chapter) - 1, (int) (time / STEP_SECONDS)); }
     static Component caption(int chapter, double time) {
         return text(CHAPTERS[chapter] + ".step" + (step(chapter, time) + 1));
     }
@@ -98,8 +101,8 @@ final class FluxTutorialScenes {
         control(graphics, step == 0, 24, 18);
         int targetX = step == 0 ? 177 : step == 1 ? 341 : step == 2 ? 325 : 269;
         int targetY = step == 0 ? 90 : step == 1 ? 39 : step == 2 ? 145 : 23;
-        double travel = TutorialTimeline.transition(time % 6, 0, 1.3);
-        cursor(graphics, (int) (176 + (targetX - 176) * travel), (int) (90 + (targetY - 90) * travel), time % 6 > 1.3 && time % 6 < 2.3);
+        double travel = TutorialTimeline.transition(time % STEP_SECONDS, 0, 1.3);
+        cursor(graphics, (int) (176 + (targetX - 176) * travel), (int) (90 + (targetY - 90) * travel), time % STEP_SECONDS > 1.3 && time % STEP_SECONDS < 2.3);
     }
 
     private static void power(GuiGraphics graphics, int step, double time) {
@@ -153,7 +156,7 @@ final class FluxTutorialScenes {
             int x = 27 + index * 60;
             label(graphics, Component.translatable("screen.quantumflux.upgrade_slot." + UpgradeType.values()[index].key()), x, 26, MUTED);
             panel(graphics, x - 9, 38, 18, 18);
-            if (index <= step && (index < step || time % 6 >= 2)) {
+            if (index <= step && (index < step || time % STEP_SECONDS >= 2)) {
                 graphics.renderItem(Assets.UPGRADES[index], x - 8, 39);
             }
             if (index == step) graphics.renderOutline(x - 9, 38, 18, 18, ACCENT);
@@ -164,20 +167,16 @@ final class FluxTutorialScenes {
             int y = row < 3 ? 132 + row * 18 : 190;
             panel(graphics, 40 + col * 18, y, 18, 18);
         }
-        double progress = TutorialTimeline.transition(time % 6, .7, 2);
+        double progress = TutorialTimeline.transition(time % STEP_SECONDS, .7, 2);
         int itemX = (int) (49 + step * 18 + (27 + step * 60 - 49 - step * 18) * progress);
         int itemY = (int) (141 - 94 * progress);
-        if (time % 6 < 2) graphics.renderItem(Assets.UPGRADES[step], itemX - 8, itemY - 8);
-        cursor(graphics, itemX + 4, itemY + 2, time % 6 < .7 || time % 6 >= 2 && time % 6 < 2.8);
+        if (time % STEP_SECONDS < 2) graphics.renderItem(Assets.UPGRADES[step], itemX - 8, itemY - 8);
+        cursor(graphics, itemX + 4, itemY + 2, time % STEP_SECONDS < .7 || time % STEP_SECONDS >= 2 && time % STEP_SECONDS < 2.8);
         graphics.pose().popPose();
     }
 
     private static void model(GuiGraphics graphics, ItemStack stack, double x, double y, double size) {
-        graphics.pose().pushPose();
-        graphics.pose().translate(x - size / 2, y - size / 2, 0);
-        graphics.pose().scale((float) size / 16, (float) size / 16, 1);
-        graphics.renderItem(stack, 0, 0);
-        graphics.pose().popPose();
+        ModelPreview.item(graphics, stack, x, y, size);
     }
 
     private static void demoButton(GuiGraphics graphics, int x, int y, int width, Component label) {

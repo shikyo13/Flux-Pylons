@@ -40,15 +40,17 @@ The [wiki](https://github.com/shikyo13/Flux-Pylons/tree/main/docs/wiki) covers s
 | 1.20.1 | Forge 47.4.10 or later in the 47 series | 17 | [mc/1.20.1-forge](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-forge) |
 | 1.20.1 | Fabric Loader 0.16.14 or later | 17 | [mc/1.20.1-fabric](https://github.com/shikyo13/Flux-Pylons/tree/mc/1.20.1-fabric) |
 
-Install the matching file on both the server and clients. An energy source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
+Install the matching file on both the server and clients. ZeroMods Core 0.1.2 is bundled in every build; no separate Core download is needed. Compatible ZeroMods bundles share one loader-selected Core instance. An energy source from another mod is needed; Flux Pylons does not generate power or keep chunks loaded.
 
 The Fabric builds use [Fabric API](https://modrinth.com/mod/fabric-api) and [Forge Config API Port](https://modrinth.com/mod/forge-config-api-port). Team Reborn's Energy API is bundled. Fabric energy is shown as E; Forge and NeoForge use FE.
 
 Use the file's version and loader tags when downloading. See the [roadmap](ROADMAP.md) for planned ports.
 
+See [Core integration](docs/CORE_INTEGRATION.md) for shared-code ownership and bundling details.
+
 ## Build
 
-Use JDK 21 and the included Gradle wrapper:
+Use JDK 21 and the included Gradle wrapper. Check out [ZeroMods Core](https://github.com/shikyo13/ZeroMods-Core) at `v0.1.2` in a sibling directory named `ZeroMods-Core` before building:
 
 ```sh
 ./gradlew build
