@@ -125,3 +125,15 @@ tasks.named('jar', Jar).configure {
         rename { 'LICENSE_NEOFORGED_MDK_TEMPLATE.txt' }
     }
 }
+
+dependencies {
+    implementation 'com.zeromods:zeromods-core-forge-1.20.1:0.1.2'
+    jarJar('com.zeromods:zeromods-core-forge-1.20.1') {
+        version { strictly '[0.1.2,0.2.0)'; prefer '0.1.2' }
+    }
+}
+// Bundle the production-mapped adapter rather than its development variant.
+configurations.jarJar.attributes {
+    attribute(net.neoforged.moddevgradle.legacyforge.internal.MinecraftMappings.ATTRIBUTE,
+            objects.named(net.neoforged.moddevgradle.legacyforge.internal.MinecraftMappings, 'srg'))
+}
