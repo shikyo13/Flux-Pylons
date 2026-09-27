@@ -130,7 +130,7 @@ tasks.named('jar', Jar).configure {
 // Shared mod; composite substitution builds the sibling checkout automatically.
 dependencies { jarJar(implementation('com.zeromods:zeromods-core-neoforge-1.21.1')) {
     version {
-        strictly '[0.1.2,0.2.0)'
-        prefer '0.1.2'
+        strictly '[0.1.3,0.2.0)'
+        prefer '0.1.3'
     }
 } }
