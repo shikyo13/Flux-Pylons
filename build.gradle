@@ -127,9 +127,9 @@ tasks.named('jar', Jar).configure {
 }
 
 dependencies {
-    implementation 'com.zeromods:zeromods-core-forge-1.20.1:0.1.2'
+    implementation 'com.zeromods:zeromods-core-forge-1.20.1:0.1.3'
     jarJar('com.zeromods:zeromods-core-forge-1.20.1') {
-        version { strictly '[0.1.2,0.2.0)'; prefer '0.1.2' }
+        version { strictly '[0.1.3,0.2.0)'; prefer '0.1.3' }
     }
 }
 // Bundle the production-mapped adapter rather than its development variant.
